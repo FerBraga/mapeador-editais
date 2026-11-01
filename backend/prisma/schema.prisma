@@ -1,0 +1,293 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum SourceType {
+  PUBLIC_PROCUREMENT
+  CULTURE
+  INNOVATION
+  OTHER
+}
+
+enum ScraperExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  PARTIALLY_COMPLETED
+}
+
+enum OpportunityStatus {
+  OPEN
+  UPCOMING
+  CLOSED
+  SUSPENDED
+  CANCELLED
+  UNKNOWN
+}
+
+enum DocumentExtractionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum AIAnalysisStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum RequiredDocumentCategory {
+  LEGAL
+  TAX
+  FINANCIAL
+  TECHNICAL
+  DECLARATION
+  OTHER
+}
+
+enum NotificationType {
+  NEW_OPPORTUNITY
+  OPPORTUNITY_UPDATED
+  DEADLINE_REMINDER
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  favoriteLocations UserFavoriteLocation[]
+  notifications     Notification[]
+
+  @@map("users")
+}
+
+model Source {
+  id               String     @id @default(uuid())
+  name             String
+  baseUrl          String     @map("base_url")
+  sourceType       SourceType @map("source_type")
+  scraperKey       String     @unique @map("scraper_key")
+  isActive         Boolean    @default(true) @map("is_active")
+  lastExecutionAt  DateTime?  @map("last_execution_at")
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+
+  executions    ScraperExecution[]
+  opportunities Opportunity[]
+
+  @@map("sources")
+}
+
+model ScraperExecution {
+  id            String                 @id @default(uuid())
+  sourceId      String                 @map("source_id")
+  status        ScraperExecutionStatus @default(PENDING)
+  startedAt     DateTime?              @map("started_at")
+  finishedAt    DateTime?              @map("finished_at")
+  itemsFound    Int                    @default(0) @map("items_found")
+  itemsCreated  Int                    @default(0) @map("items_created")
+  itemsUpdated  Int                    @default(0) @map("items_updated")
+  errorMessage  String?                @map("error_message")
+  metadata      Json?
+  createdAt     DateTime               @default(now()) @map("created_at")
+  updatedAt     DateTime               @updatedAt @map("updated_at")
+
+  source Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([sourceId, status])
+  @@map("scraper_executions")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  opportunities Opportunity[]
+
+  @@map("categories")
+}
+
+model Municipality {
+  id        String                   @id @default(uuid())
+  name      String
+  ibgeCode  String                   @unique @map("ibge_code")
+  state     String                   @default("PR")
+  latitude  Decimal                  @db.Decimal(9, 6)
+  longitude Decimal                  @db.Decimal(9, 6)
+  location  Unsupported("geography(Point, 4326)")
+  createdAt DateTime                 @default(now()) @map("created_at")
+  updatedAt DateTime                 @updatedAt @map("updated_at")
+
+  opportunities     Opportunity[]
+  favoritedBy       UserFavoriteLocation[]
+
+  @@map("municipalities")
+}
+
+model Opportunity {
+  id                     String             @id @default(uuid())
+  sourceId               String             @map("source_id")
+  externalId             String             @map("external_id")
+  categoryId             String?            @map("category_id")
+  municipalityId         String?            @map("municipality_id")
+  title                  String
+  slug                   String             @unique
+  issuingOrganization    String?            @map("issuing_organization")
+  description            String?
+  object                 String?
+  officialUrl            String             @map("official_url")
+  noticeNumber           String?            @map("notice_number")
+  fundingMin             Decimal?           @map("funding_min") @db.Decimal(14, 2)
+  fundingMax             Decimal?           @map("funding_max") @db.Decimal(14, 2)
+  registrationStartAt    DateTime?          @map("registration_start_at")
+  registrationEndAt      DateTime?          @map("registration_end_at")
+  publishedAt            DateTime?          @map("published_at")
+  status                 OpportunityStatus  @default(UNKNOWN)
+  rawData                Json?              @map("raw_data")
+  contentHash            String             @map("content_hash")
+  lastScrapedAt          DateTime?          @map("last_scraped_at")
+  createdAt              DateTime           @default(now()) @map("created_at")
+  updatedAt              DateTime           @updatedAt @map("updated_at")
+
+  source       Source        @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  category     Category?     @relation(fields: [categoryId], references: [id])
+  municipality Municipality? @relation(fields: [municipalityId], references: [id])
+
+  documents         Document[]
+  aiAnalyses        AIAnalysis[]
+  requiredDocuments RequiredDocument[]
+  notifications     Notification[]
+
+  @@unique([sourceId, externalId])
+  @@index([status])
+  @@index([categoryId])
+  @@index([municipalityId])
+  @@index([registrationEndAt])
+  @@map("opportunities")
+}
+
+model Document {
+  id               String                   @id @default(uuid())
+  opportunityId    String                   @map("opportunity_id")
+  originalFilename String                   @map("original_filename")
+  storageKey       String?                  @map("storage_key")
+  mimeType         String?                  @map("mime_type")
+  fileSize         Int?                     @map("file_size")
+  checksum         String?
+  extractionStatus DocumentExtractionStatus @default(PENDING) @map("extraction_status")
+  extractedText    String?                  @map("extracted_text")
+  documentType     String?                  @map("document_type")
+  sourceUrl        String?                  @map("source_url")
+  createdAt        DateTime                 @default(now()) @map("created_at")
+  updatedAt        DateTime                 @updatedAt @map("updated_at")
+
+  opportunity Opportunity  @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  aiAnalyses  AIAnalysis[]
+
+  @@index([opportunityId])
+  @@index([extractionStatus])
+  @@map("documents")
+}
+
+model AIAnalysis {
+  id               String            @id @default(uuid())
+  opportunityId    String            @map("opportunity_id")
+  documentId       String?           @map("document_id")
+  model            String
+  promptVersion    String            @map("prompt_version")
+  status           AIAnalysisStatus  @default(PENDING)
+  summary          String?
+  structuredResult Json?             @map("structured_result")
+  confidence       Decimal?          @db.Decimal(4, 3)
+  tokensInput      Int?              @map("tokens_input")
+  tokensOutput     Int?              @map("tokens_output")
+  errorMessage     String?           @map("error_message")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  document    Document?   @relation(fields: [documentId], references: [id])
+
+  @@index([opportunityId])
+  @@index([documentId])
+  @@map("ai_analyses")
+}
+
+model RequiredDocument {
+  id                 String                   @id @default(uuid())
+  opportunityId      String                   @map("opportunity_id")
+  name               String
+  description        String?
+  documentCategory   RequiredDocumentCategory @map("document_category")
+  isMandatory        Boolean                  @default(true) @map("is_mandatory")
+  sourceDocumentId   String?                  @map("source_document_id")
+  sourcePage         Int?                     @map("source_page")
+  createdAt          DateTime                 @default(now()) @map("created_at")
+  updatedAt          DateTime                 @updatedAt @map("updated_at")
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@index([opportunityId])
+  @@map("required_documents")
+}
+
+model UserFavoriteLocation {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  municipalityId String   @map("municipality_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  municipality Municipality @relation(fields: [municipalityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, municipalityId])
+  @@map("user_favorite_locations")
+}
+
+model Notification {
+  id            String             @id @default(uuid())
+  userId        String             @map("user_id")
+  opportunityId String             @map("opportunity_id")
+  type          NotificationType
+  status        NotificationStatus @default(PENDING)
+  sentAt        DateTime?          @map("sent_at")
+  createdAt     DateTime           @default(now()) @map("created_at")
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, opportunityId, type])
+  @@map("notifications")
+}
