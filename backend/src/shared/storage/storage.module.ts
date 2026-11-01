@@ -1,5 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
+import { StorageService } from './storage.service';
+import { LocalFilesystemStorageService } from './local-filesystem-storage.service';
 
-// Placeholder: S3-compatible upload/download lands in the document pipeline change.
-@Module({})
+@Global()
+@Module({
+  providers: [{ provide: StorageService, useClass: LocalFilesystemStorageService }],
+  exports: [StorageService],
+})
 export class StorageModule {}

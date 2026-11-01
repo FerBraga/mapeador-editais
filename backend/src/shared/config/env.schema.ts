@@ -7,6 +7,7 @@ export const envSchema = z.object({
   REDIS_HOST: z.string().min(1, 'REDIS_HOST is required'),
   REDIS_PORT: z.coerce.number().int().positive().default(6379),
   CORS_ORIGINS: z.string().min(1, 'CORS_ORIGINS is required'),
+  STORAGE_LOCAL_DIR: z.string().default('uploads'),
 });
 
 export type Env = z.infer<typeof envSchema>;

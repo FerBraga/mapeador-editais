@@ -1,3 +1,6 @@
+-- Needed because Prisma wipes and replays the shadow DB's public schema for drift detection.
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 -- CreateEnum
 CREATE TYPE "SourceType" AS ENUM ('PUBLIC_PROCUREMENT', 'CULTURE', 'INNOVATION', 'OTHER');
 

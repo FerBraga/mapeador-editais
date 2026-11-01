@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 // ---------------------------------------------------------------------------
@@ -208,6 +209,9 @@ model Document {
   checksum         String?
   extractionStatus DocumentExtractionStatus @default(PENDING) @map("extraction_status")
   extractedText    String?                  @map("extracted_text")
+  pageCount        Int?                     @map("page_count")
+  needsOcr         Boolean                  @default(false) @map("needs_ocr")
+  errorMessage     String?                  @map("error_message")
   documentType     String?                  @map("document_type")
   sourceUrl        String?                  @map("source_url")
   createdAt        DateTime                 @default(now()) @map("created_at")

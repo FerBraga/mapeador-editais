@@ -31,6 +31,10 @@ function buildQueueMock() {
   return { add: jest.fn() };
 }
 
+function buildDocumentsServiceMock() {
+  return { enqueueNewDocument: jest.fn() };
+}
+
 class FakeScraper implements NoticeScraper {
   readonly sourceKey = 'fake-source';
 
@@ -61,6 +65,7 @@ describe('ScrapersService', () => {
     prisma.opportunity.findUnique.mockResolvedValue(null);
     prisma.opportunity.create.mockResolvedValue({ id: 'opp-1' });
     prisma.document.findFirst.mockResolvedValue(null);
+    prisma.document.create.mockResolvedValue({ id: 'doc-1' });
 
     const scraper = new FakeScraper(
       [{ externalId: 'ext-1', title: 'Edital 1', officialUrl: 'https://example.test/1' }],
@@ -74,9 +79,11 @@ describe('ScrapersService', () => {
       },
     );
 
+    const documents = buildDocumentsServiceMock();
     const service = new ScrapersService(
       prisma as any,
       new ScraperNormalizationService(),
+      documents as any,
       [scraper],
       buildQueueMock() as any,
     );
@@ -86,6 +93,7 @@ describe('ScrapersService', () => {
     expect(summary.status).toBe('COMPLETED');
     expect(summary.itemsCreated).toBe(1);
     expect(prisma.opportunity.create).toHaveBeenCalledTimes(1);
+    expect(documents.enqueueNewDocument).toHaveBeenCalledWith('doc-1');
     expect(prisma.document.create).toHaveBeenCalledTimes(1);
   });
 
@@ -110,7 +118,13 @@ describe('ScrapersService', () => {
       { 'ext-1': details },
     );
 
-    const service = new ScrapersService(prisma as any, normalization, [scraper], buildQueueMock() as any);
+    const service = new ScrapersService(
+      prisma as any,
+      normalization,
+      buildDocumentsServiceMock() as any,
+      [scraper],
+      buildQueueMock() as any,
+    );
 
     const summary = await service.runSource('fake-source');
 
@@ -147,6 +161,7 @@ describe('ScrapersService', () => {
     const service = new ScrapersService(
       prisma as any,
       new ScraperNormalizationService(),
+      buildDocumentsServiceMock() as any,
       [scraper],
       buildQueueMock() as any,
     );
@@ -160,6 +175,41 @@ describe('ScrapersService', () => {
         data: expect.objectContaining({ title: 'Edital 1 atualizado' }),
       }),
     );
+  });
+
+  it('does not enqueue processing for an attachment whose document already exists', async () => {
+    const prisma = buildPrismaMock();
+    prisma.source.findUnique.mockResolvedValue(SOURCE);
+    prisma.scraperExecution.findFirst.mockResolvedValue(null);
+    prisma.scraperExecution.create.mockResolvedValue({ id: 'exec-1' });
+    prisma.opportunity.findUnique.mockResolvedValue({ id: 'opp-1', contentHash: 'stale-hash' });
+    prisma.document.findFirst.mockResolvedValue({ id: 'existing-doc' });
+
+    const scraper = new FakeScraper(
+      [{ externalId: 'ext-1', title: 'Edital 1 atualizado', officialUrl: 'https://example.test/1' }],
+      {
+        'ext-1': {
+          externalId: 'ext-1',
+          title: 'Edital 1 atualizado',
+          officialUrl: 'https://example.test/1',
+          attachments: [{ url: 'https://example.test/1.pdf', label: 'Anexo' }],
+        },
+      },
+    );
+
+    const documents = buildDocumentsServiceMock();
+    const service = new ScrapersService(
+      prisma as any,
+      new ScraperNormalizationService(),
+      documents as any,
+      [scraper],
+      buildQueueMock() as any,
+    );
+
+    await service.runSource('fake-source');
+
+    expect(prisma.document.create).not.toHaveBeenCalled();
+    expect(documents.enqueueNewDocument).not.toHaveBeenCalled();
   });
 
   it('keeps processing remaining items and marks the execution as partially completed when one item fails', async () => {
@@ -190,6 +240,7 @@ describe('ScrapersService', () => {
     const service = new ScrapersService(
       prisma as any,
       new ScraperNormalizationService(),
+      buildDocumentsServiceMock() as any,
       [scraper],
       buildQueueMock() as any,
     );
@@ -214,6 +265,7 @@ describe('ScrapersService', () => {
     const service = new ScrapersService(
       prisma as any,
       new ScraperNormalizationService(),
+      buildDocumentsServiceMock() as any,
       [scraper],
       buildQueueMock() as any,
     );

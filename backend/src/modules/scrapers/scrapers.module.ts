@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
+import { DocumentsModule } from '../documents/documents.module';
 import { ScrapersController } from './scrapers.controller';
 import { ScrapersService } from './scrapers.service';
 import { ScraperNormalizationService } from './scraper-normalization.service';
@@ -11,7 +12,7 @@ import { PncpPrScraper } from './pncp-pr/pncp-pr.scraper';
 import { SCRAPERS_QUEUE } from './scrapers.constants';
 
 @Module({
-  imports: [BullModule.registerQueue({ name: SCRAPERS_QUEUE })],
+  imports: [BullModule.registerQueue({ name: SCRAPERS_QUEUE }), DocumentsModule],
   controllers: [ScrapersController],
   providers: [
     ScrapersService,

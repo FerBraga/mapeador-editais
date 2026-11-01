@@ -3,6 +3,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { Prisma, ScraperExecutionStatus } from '@prisma/client';
 import { PrismaService } from '../../shared/database/prisma.service';
+import { DocumentsService } from '../documents/documents.service';
 import { NOTICE_SCRAPERS, NoticeScraper } from './contracts/notice-scraper.interface';
 import { ScraperNormalizationService } from './scraper-normalization.service';
 import { SCRAPERS_QUEUE, RUN_SOURCE_JOB } from './scrapers.constants';
@@ -22,6 +23,7 @@ export class ScrapersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly normalization: ScraperNormalizationService,
+    private readonly documents: DocumentsService,
     @Inject(NOTICE_SCRAPERS) private readonly scrapers: NoticeScraper[],
     @InjectQueue(SCRAPERS_QUEUE) private readonly queue: Queue,
   ) {}
@@ -197,13 +199,14 @@ export class ScrapersService {
       });
       if (existingDocument) continue;
 
-      await this.prisma.document.create({
+      const document = await this.prisma.document.create({
         data: {
           opportunityId,
           originalFilename: attachment.originalFilename,
           sourceUrl: attachment.sourceUrl,
         },
       });
+      await this.documents.enqueueNewDocument(document.id);
     }
   }
 

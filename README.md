@@ -7,7 +7,7 @@ Este repositório está organizado como um monorepo (`npm workspaces`) com:
 - `backend/` — API NestJS + Prisma (PostgreSQL/PostGIS) + BullMQ/Redis
 - `frontend/` — React + Vite + Tailwind CSS + shadcn/ui
 
-A implementação segue o processo de changes do [OpenSpec](openspec/), em `openspec/changes/`. `foundation-setup` e `primeiro-scraper` já estão arquivadas em `openspec/changes/archive/`; a change `expansao-scrapers` adiciona as fontes Fundação Araucária e PNCP/PR.
+A implementação segue o processo de changes do [OpenSpec](openspec/), em `openspec/changes/`. `foundation-setup`, `primeiro-scraper` e `expansao-scrapers` já estão arquivadas em `openspec/changes/archive/`; a change `pipeline-documentos` adiciona o download e a extração de texto dos anexos capturados pelos scrapers.
 
 **Fontes de editais ativas:**
 
@@ -31,6 +31,10 @@ A implementação segue o processo de changes do [OpenSpec](openspec/), em `open
    ```
 
    Ajuste `POSTGRES_PORT`/`REDIS_PORT` (raiz) e `DATABASE_URL`/`REDIS_PORT` (backend) se as portas padrão (5433/6380) colidirem com algo já rodando na sua máquina — mantenha os dois arquivos consistentes entre si.
+
+   `SHADOW_DATABASE_URL` (backend) é usada apenas pelo Prisma CLI para o shadow database de `migrate dev`. Como o PostGIS não é herdado automaticamente por um banco criado do zero, crie-o manualmente uma vez: `docker exec mapeador-editais-postgres psql -U mapeador -d postgres -c "CREATE DATABASE mapeador_editais_shadow;"` (o `template1` já tem PostGIS habilitado neste ambiente, então o novo banco herda automaticamente).
+
+   `STORAGE_LOCAL_DIR` (backend) define onde os anexos baixados são salvos em disco (padrão `uploads`, relativo ao diretório de execução — `backend/uploads/` em uso normal).
 
 2. **Instalar dependências**
 
@@ -77,14 +81,14 @@ A implementação segue o processo de changes do [OpenSpec](openspec/), em `open
    ```bash
    cd backend
    npm run build
-   npm run worker:scraper       # consome a fila "scrapers" (único worker com lógica de negócio nesta etapa)
-   npm run worker:document      # stub — sem processador ainda
+   npm run worker:scraper       # consome a fila "scrapers"
+   npm run worker:document      # consome a fila "documents" (download + extração de texto de PDFs)
    npm run worker:ai-analysis   # stub — sem processador ainda
    npm run worker:geolocation   # stub — sem processador ainda
    npm run worker:notification  # stub — sem processador ainda
    ```
 
-   O worker `scraper` registra automaticamente um job diário (03:00) por fonte e consome a fila; a API apenas enfileira (não processa) execuções.
+   O worker `scraper` registra automaticamente um job diário (03:00) por fonte e consome a fila; a API apenas enfileira (não processa) execuções. Ao criar um novo anexo, o scraper enfileira automaticamente seu processamento na fila `documents` — o worker `document` precisa estar rodando para que isso avance.
 
 8. **Disparar uma captura manualmente**
 
@@ -97,6 +101,14 @@ A implementação segue o processo de changes do [OpenSpec](openspec/), em `open
    ```
 
    A API responde `202 Accepted` com o `jobId` imediatamente; o resultado fica registrado em `scraper_executions` depois que o worker processa o job.
+
+9. **Reprocessar um documento manualmente**
+
+   ```bash
+   curl -X POST http://localhost:3000/api/v1/documents/<id>/reprocess
+   ```
+
+   Útil para documentos com `extractionStatus = FAILED`. Reseta o documento para `PENDING` e enfileira uma nova tentativa, sem criar um registro duplicado.
 
 ## Adicionando um novo módulo de domínio
 
