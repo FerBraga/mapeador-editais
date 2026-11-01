@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, SourceType } from '@prisma/client';
 
 const prisma = new PrismaClient();
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -56,9 +56,30 @@ async function seedMunicipalities() {
   console.log(`Seeded ${count} municipalities for PR`);
 }
 
+const SOURCES = [
+  {
+    name: 'Cultura SEEC-PR',
+    baseUrl: 'https://www.cultura.pr.gov.br',
+    sourceType: SourceType.CULTURE,
+    scraperKey: 'cultura-pr',
+  },
+];
+
+async function seedSources() {
+  for (const source of SOURCES) {
+    await prisma.source.upsert({
+      where: { scraperKey: source.scraperKey },
+      update: { name: source.name, baseUrl: source.baseUrl, sourceType: source.sourceType },
+      create: source,
+    });
+  }
+  console.log(`Seeded ${SOURCES.length} sources`);
+}
+
 async function main() {
   await seedCategories();
   await seedMunicipalities();
+  await seedSources();
 }
 
 main()

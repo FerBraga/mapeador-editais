@@ -7,7 +7,7 @@ Este repositório está organizado como um monorepo (`npm workspaces`) com:
 - `backend/` — API NestJS + Prisma (PostgreSQL/PostGIS) + BullMQ/Redis
 - `frontend/` — React + Vite + Tailwind CSS + shadcn/ui
 
-A implementação segue o processo de changes do [OpenSpec](openspec/), em `openspec/changes/`. Esta primeira change (`foundation-setup`) entrega apenas a fundação do projeto: estrutura, banco de dados e módulos esqueleto — sem lógica de negócio ainda.
+A implementação segue o processo de changes do [OpenSpec](openspec/), em `openspec/changes/`. A fundação do projeto (`foundation-setup`) já está arquivada em `openspec/changes/archive/`; a change `primeiro-scraper` adiciona a primeira captura real de editais (fonte Cultura SEEC-PR).
 
 ## Pré-requisitos
 
@@ -47,7 +47,7 @@ A implementação segue o processo de changes do [OpenSpec](openspec/), em `open
    cd ..
    ```
 
-   O seed popula as categorias iniciais e os 399 municípios do Paraná (nome, código IBGE, latitude/longitude e o campo geográfico PostGIS).
+   O seed popula as categorias iniciais, os 399 municípios do Paraná (nome, código IBGE, latitude/longitude e o campo geográfico PostGIS) e as fontes de scraping cadastradas (atualmente, "Cultura SEEC-PR").
 
 5. **Rodar o backend**
 
@@ -66,21 +66,44 @@ A implementação segue o processo de changes do [OpenSpec](openspec/), em `open
 
    Acesse `http://localhost:5173`. A página inicial consulta o health-check da API para confirmar a conexão.
 
-7. **Rodar os workers** (stubs nesta etapa — conectam à fila, sem processadores de negócio ainda)
+7. **Rodar os workers**
 
    ```bash
    cd backend
    npm run build
-   npm run worker:scraper
-   npm run worker:document
-   npm run worker:ai-analysis
-   npm run worker:geolocation
-   npm run worker:notification
+   npm run worker:scraper       # consome a fila "scrapers" (único worker com lógica de negócio nesta etapa)
+   npm run worker:document      # stub — sem processador ainda
+   npm run worker:ai-analysis   # stub — sem processador ainda
+   npm run worker:geolocation   # stub — sem processador ainda
+   npm run worker:notification  # stub — sem processador ainda
    ```
+
+   O worker `scraper` registra automaticamente um job diário (03:00) por fonte e consome a fila; a API apenas enfileira (não processa) execuções.
+
+8. **Disparar uma captura manualmente**
+
+   Com o backend e o `worker:scraper` rodando:
+
+   ```bash
+   curl -X POST http://localhost:3000/api/v1/scrapers/cultura-pr/run
+   ```
+
+   A API responde `202 Accepted` com o `jobId` imediatamente; o resultado fica registrado em `scraper_executions` depois que o worker processa o job.
 
 ## Adicionando um novo módulo de domínio
 
 Os módulos em `backend/src/modules/*` seguem o padrão NestJS (`*.module.ts` + `*.controller.ts` + `*.service.ts`), registrados em `backend/src/app.module.ts`. Infraestrutura compartilhada (banco, fila, config, logger, exceções, storage, validadores) vive em `backend/src/shared/*` e é importada pelos módulos de domínio conforme necessário.
+
+## Adicionando uma nova fonte de scraping
+
+O `scraper-framework` (`backend/src/modules/scrapers/`) cuida de normalização, deduplicação, lock de execução, registro em `ScraperExecution` e agendamento — uma nova fonte só precisa implementar a captura específica do portal:
+
+1. Crie `backend/src/modules/scrapers/<fonte>/<fonte>.scraper.ts` implementando `NoticeScraper` (`sourceKey`, `fetchOpportunities()`, `fetchOpportunityDetails(externalId)`).
+2. Extraia o parsing de HTML para `<fonte>.mapper.ts` (funções puras, fáceis de testar com fixtures) e o acesso HTTP (rate limit + `User-Agent`) para um client dedicado, seguindo o padrão de `scrapers/cultura-pr/`.
+3. Registre o novo scraper como provider em `scrapers.module.ts` e adicione-o ao array retornado pela factory do token `NOTICE_SCRAPERS`.
+4. Cadastre o `Source` correspondente (via `prisma/seed.ts`), com `scraperKey` igual ao `sourceKey` da nova classe.
+5. Adicione o `scraperKey` à lista `DAILY_SCRAPER_KEYS` em `scrapers.constants.ts` para que o agendamento diário o inclua.
+6. Crie fixtures HTML reais em `<fonte>/__fixtures__/` e testes unitários do mapper/scraper sem acesso de rede real (mock do client HTTP), seguindo `cultura-pr/__tests__/`.
 
 ## Status do projeto
 
