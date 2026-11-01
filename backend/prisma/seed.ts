@@ -63,6 +63,18 @@ const SOURCES = [
     sourceType: SourceType.CULTURE,
     scraperKey: 'cultura-pr',
   },
+  {
+    name: 'Fundação Araucária',
+    baseUrl: 'https://www.fappr.pr.gov.br',
+    sourceType: SourceType.INNOVATION,
+    scraperKey: 'fundacao-araucaria',
+  },
+  {
+    name: 'Compras Públicas PR (PNCP)',
+    baseUrl: 'https://pncp.gov.br/api/consulta',
+    sourceType: SourceType.PUBLIC_PROCUREMENT,
+    scraperKey: 'pncp-pr',
+  },
 ];
 
 async function seedSources() {

@@ -7,7 +7,13 @@ Este repositório está organizado como um monorepo (`npm workspaces`) com:
 - `backend/` — API NestJS + Prisma (PostgreSQL/PostGIS) + BullMQ/Redis
 - `frontend/` — React + Vite + Tailwind CSS + shadcn/ui
 
-A implementação segue o processo de changes do [OpenSpec](openspec/), em `openspec/changes/`. A fundação do projeto (`foundation-setup`) já está arquivada em `openspec/changes/archive/`; a change `primeiro-scraper` adiciona a primeira captura real de editais (fonte Cultura SEEC-PR).
+A implementação segue o processo de changes do [OpenSpec](openspec/), em `openspec/changes/`. `foundation-setup` e `primeiro-scraper` já estão arquivadas em `openspec/changes/archive/`; a change `expansao-scrapers` adiciona as fontes Fundação Araucária e PNCP/PR.
+
+**Fontes de editais ativas:**
+
+- **Cultura SEEC-PR** (`cultura-pr`) — scraping de `www.cultura.pr.gov.br`.
+- **Fundação Araucária** (`fundacao-araucaria`) — scraping de `www.fappr.pr.gov.br/Programas-Abertos`.
+- **Compras Públicas PR** (`pncp-pr`) — consumo da API pública do PNCP (Portal Nacional de Contratações Públicas), filtrada por `uf=PR` e restrita a órgãos estaduais (`esferaId = "E"`). **Desvio do planejamento original**: a fonte originalmente prevista era o sistema GMS do "Compras Paraná" (`gms.pr.gov.br`), mas ele exige resolução de captcha em qualquer consulta, tornando-o inviável para scraping automatizado; o Portal da Transparência do Paraná também foi avaliado e descartado (bloqueado por `robots.txt`). A API do PNCP cobre a mesma necessidade de negócio (licitações do governo estadual) de forma pública e sem captcha.
 
 ## Pré-requisitos
 
@@ -47,7 +53,7 @@ A implementação segue o processo de changes do [OpenSpec](openspec/), em `open
    cd ..
    ```
 
-   O seed popula as categorias iniciais, os 399 municípios do Paraná (nome, código IBGE, latitude/longitude e o campo geográfico PostGIS) e as fontes de scraping cadastradas (atualmente, "Cultura SEEC-PR").
+   O seed popula as categorias iniciais, os 399 municípios do Paraná (nome, código IBGE, latitude/longitude e o campo geográfico PostGIS) e as 3 fontes de scraping cadastradas (Cultura SEEC-PR, Fundação Araucária, Compras Públicas PR/PNCP).
 
 5. **Rodar o backend**
 
@@ -86,6 +92,8 @@ A implementação segue o processo de changes do [OpenSpec](openspec/), em `open
 
    ```bash
    curl -X POST http://localhost:3000/api/v1/scrapers/cultura-pr/run
+   curl -X POST http://localhost:3000/api/v1/scrapers/fundacao-araucaria/run
+   curl -X POST http://localhost:3000/api/v1/scrapers/pncp-pr/run
    ```
 
    A API responde `202 Accepted` com o `jobId` imediatamente; o resultado fica registrado em `scraper_executions` depois que o worker processa o job.

@@ -1,0 +1,43 @@
+{
+  "data": [
+    {
+      "orgaoEntidade": {
+        "cnpj": "76416940000185",
+        "razaoSocial": "DEPARTAMENTO DE ESTRADAS DE RODAGEM DO ESTADO DO PARANA - DER-PR",
+        "poderId": "E",
+        "esferaId": "E"
+      },
+      "dataAtualizacao": "2026-09-15T09:00:00",
+      "dataInclusao": "2026-09-15T09:00:00",
+      "anoCompra": 2026,
+      "sequencialCompra": 42,
+      "numeroCompra": "77",
+      "processo": "26.100.123-1",
+      "objetoCompra": "CONTRATAÇÃO DE SERVIÇOS DE MANUTENÇÃO DE RODOVIAS",
+      "dataAberturaProposta": "2026-09-16T09:00:00",
+      "dataEncerramentoProposta": "2026-09-30T10:00:00",
+      "dataPublicacaoPncp": "2026-09-15T09:00:00",
+      "unidadeOrgao": {
+        "ufNome": "Paraná",
+        "ufSigla": "PR",
+        "municipioNome": "Curitiba",
+        "codigoUnidade": "1",
+        "codigoIbge": "4106902",
+        "nomeUnidade": "DER-PR Sede"
+      },
+      "linkSistemaOrigem": null,
+      "linkProcessoEletronico": "https://www.eprotocolo.pr.gov.br/spiweb/posicionamento.do?codPendencia=1",
+      "numeroControlePNCP": "76416940000185-1-000042/2026",
+      "valorTotalEstimado": 500000.0,
+      "modalidadeId": 6,
+      "modalidadeNome": "Pregão - Eletrônico",
+      "situacaoCompraId": "1",
+      "situacaoCompraNome": "Divulgada no PNCP"
+    }
+  ],
+  "totalRegistros": 2,
+  "totalPaginas": 2,
+  "numeroPagina": 2,
+  "paginasRestantes": 0,
+  "empty": false
+}

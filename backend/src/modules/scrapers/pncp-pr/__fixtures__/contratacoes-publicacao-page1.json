@@ -1,0 +1,77 @@
+{
+  "data": [
+    {
+      "orgaoEntidade": {
+        "cnpj": "24039073000155",
+        "razaoSocial": "FUNDACAO ESTATAL DE ATENCAO EM SAUDE DO ESTADO DO PARANA - FUNEAS-PARANA",
+        "poderId": "E",
+        "esferaId": "E"
+      },
+      "dataAtualizacao": "2026-09-01T10:46:34",
+      "dataInclusao": "2026-09-01T10:46:34",
+      "anoCompra": 2026,
+      "sequencialCompra": 1095,
+      "numeroCompra": "52",
+      "processo": "26.208.989-4",
+      "objetoCompra": "PR 146/2026 - SERVIÇO MANUTENÇÃO GRUPO GERADOR",
+      "dataAberturaProposta": "2026-09-03T09:00:00",
+      "dataEncerramentoProposta": "2026-09-23T10:00:00",
+      "dataPublicacaoPncp": "2026-09-01T10:46:34",
+      "unidadeOrgao": {
+        "ufNome": "Paraná",
+        "ufSigla": "PR",
+        "municipioNome": "Curitiba",
+        "codigoUnidade": "932059",
+        "nomeUnidade": "EPR-FUNDAÇAO ESTATAL DE ATENÇAO EM SAUDEE",
+        "codigoIbge": "4106902"
+      },
+      "linkSistemaOrigem": "https://cnetmobile.estaleiro.serpro.gov.br/comprasnet-web/public/compras/acompanhamento-compra?compra=93205905000522026",
+      "linkProcessoEletronico": "https://www.eprotocolo.pr.gov.br/spiweb/posicionamento.do?action=redirecionarUCSConcluirPendencia&voltarTelaPrincipal=true&codPendencia=107510820",
+      "numeroControlePNCP": "24039073000155-1-001095/2026",
+      "valorTotalEstimado": 37131.84,
+      "modalidadeId": 6,
+      "modalidadeNome": "Pregão - Eletrônico",
+      "situacaoCompraId": "1",
+      "situacaoCompraNome": "Divulgada no PNCP"
+    },
+    {
+      "orgaoEntidade": {
+        "cnpj": "76206211000176",
+        "razaoSocial": "MUNICIPIO DE BELA VISTA DO CAROBA",
+        "poderId": "E",
+        "esferaId": "M"
+      },
+      "dataAtualizacao": "2026-10-01T00:01:07",
+      "dataInclusao": "2026-10-01T00:01:07",
+      "anoCompra": 2026,
+      "sequencialCompra": 156,
+      "numeroCompra": "PR66",
+      "processo": "PR66/2026",
+      "objetoCompra": "AQUISIÇÃO DE MATERIAIS ELÉTRICOS DESTINADOS À INSTALAÇÃO DE CARREGADOR VEICULAR",
+      "dataAberturaProposta": "2026-09-28T08:00:01",
+      "dataEncerramentoProposta": "2026-10-08T08:00:01",
+      "dataPublicacaoPncp": "2026-10-01T00:01:07",
+      "unidadeOrgao": {
+        "ufNome": "Paraná",
+        "ufSigla": "PR",
+        "municipioNome": "Bela Vista da Caroba",
+        "codigoUnidade": "1",
+        "codigoIbge": "4102752",
+        "nomeUnidade": "Prefeitura Municipal de Bela Vista da Caroba"
+      },
+      "linkSistemaOrigem": null,
+      "linkProcessoEletronico": null,
+      "numeroControlePNCP": "01612441000107-1-000156/2026",
+      "valorTotalEstimado": 20901.1,
+      "modalidadeId": 6,
+      "modalidadeNome": "Pregão - Eletrônico",
+      "situacaoCompraId": "1",
+      "situacaoCompraNome": "Divulgada no PNCP"
+    }
+  ],
+  "totalRegistros": 3,
+  "totalPaginas": 2,
+  "numeroPagina": 1,
+  "paginasRestantes": 1,
+  "empty": false
+}

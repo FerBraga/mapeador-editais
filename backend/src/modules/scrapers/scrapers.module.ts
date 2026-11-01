@@ -6,6 +6,8 @@ import { ScraperNormalizationService } from './scraper-normalization.service';
 import { ScraperSchedulerService } from './scraper-scheduler.service';
 import { NOTICE_SCRAPERS } from './contracts/notice-scraper.interface';
 import { CulturaPrScraper } from './cultura-pr/cultura-pr.scraper';
+import { FundacaoAraucariaScraper } from './fundacao-araucaria/fundacao-araucaria.scraper';
+import { PncpPrScraper } from './pncp-pr/pncp-pr.scraper';
 import { SCRAPERS_QUEUE } from './scrapers.constants';
 
 @Module({
@@ -16,10 +18,16 @@ import { SCRAPERS_QUEUE } from './scrapers.constants';
     ScraperNormalizationService,
     ScraperSchedulerService,
     CulturaPrScraper,
+    FundacaoAraucariaScraper,
+    PncpPrScraper,
     {
       provide: NOTICE_SCRAPERS,
-      useFactory: (culturaPr: CulturaPrScraper) => [culturaPr],
-      inject: [CulturaPrScraper],
+      useFactory: (
+        culturaPr: CulturaPrScraper,
+        fundacaoAraucaria: FundacaoAraucariaScraper,
+        pncpPr: PncpPrScraper,
+      ) => [culturaPr, fundacaoAraucaria, pncpPr],
+      inject: [CulturaPrScraper, FundacaoAraucariaScraper, PncpPrScraper],
     },
   ],
   exports: [ScrapersService, BullModule],
