@@ -3,7 +3,7 @@ import { ApiError } from '@/lib/api'
 import { useOpportunity } from '@/hooks/use-opportunities'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
-import { formatDate, formatFundingRange } from '@/lib/format'
+import { dedupeRequiredDocuments, formatDate, formatFundingRange } from '@/lib/format'
 
 const DOCUMENT_CATEGORY_LABELS: Record<string, string> = {
   LEGAL: 'Documentação legal',
@@ -39,6 +39,7 @@ export default function OpportunityDetailPage() {
   if (!opportunity) return null
 
   const fundingRange = formatFundingRange(opportunity.fundingMin, opportunity.fundingMax)
+  const requiredDocuments = dedupeRequiredDocuments(opportunity.requiredDocuments)
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 p-6">
@@ -103,11 +104,11 @@ export default function OpportunityDetailPage() {
         </section>
       )}
 
-      {opportunity.requiredDocuments.length > 0 && (
+      {requiredDocuments.length > 0 && (
         <section className="flex flex-col gap-2">
           <h2 className="text-sm font-semibold text-foreground">Documentos exigidos</h2>
           <ul className="flex flex-col gap-2">
-            {opportunity.requiredDocuments.map((doc) => (
+            {requiredDocuments.map((doc) => (
               <li key={doc.id} className="flex items-start justify-between gap-3 rounded-lg border border-border p-2.5 text-sm">
                 <div>
                   <p>{doc.name}</p>

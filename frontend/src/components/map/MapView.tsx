@@ -47,7 +47,11 @@ export function MapView({ municipalities, selectedMunicipalityId, onSelectMunici
           >
             <Tooltip>
               {municipality.name} — {municipality.opportunityCount}{' '}
-              {municipality.opportunityCount === 1 ? 'edital' : 'editais'}
+              {municipality.opportunityCount === 1 ? 'edital vinculado diretamente' : 'editais vinculados diretamente'}
+              <br />
+              <span className="text-xs text-muted-foreground">
+                Clique para ver também os editais estaduais aplicáveis aqui
+              </span>
             </Tooltip>
           </CircleMarker>
         )
