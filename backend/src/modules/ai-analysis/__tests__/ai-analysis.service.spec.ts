@@ -36,6 +36,12 @@ function buildQueueMock() {
   return { add: jest.fn().mockResolvedValue({ id: 'job-1' }) };
 }
 
+function buildGeolocationMock() {
+  return {
+    enqueueResolution: jest.fn().mockResolvedValue({ jobId: 'geo-job-1' }),
+  };
+}
+
 const BASE_DOCUMENT = {
   id: 'doc-1',
   opportunityId: 'opp-1',
@@ -91,11 +97,13 @@ describe('AiAnalysisService.analyzeDocument', () => {
       }),
     };
 
+    const geolocation = buildGeolocationMock();
     const service = new AiAnalysisService(
       prisma as any,
       buildConfigMock() as any,
       buildQueueMock() as any,
       provider as any,
+      geolocation as any,
     );
     await service.analyzeDocument('doc-1');
 
@@ -110,6 +118,7 @@ describe('AiAnalysisService.analyzeDocument', () => {
         tokensOutput: 50,
       }),
     });
+    expect(geolocation.enqueueResolution).toHaveBeenCalledWith('opp-1');
     expect(prisma.tx.requiredDocument.create).toHaveBeenCalledTimes(1);
     expect(prisma.tx.requiredDocument.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
@@ -159,6 +168,7 @@ describe('AiAnalysisService.analyzeDocument', () => {
       buildConfigMock() as any,
       buildQueueMock() as any,
       provider as any,
+      buildGeolocationMock() as any,
     );
     await service.analyzeDocument('doc-1');
 
@@ -182,11 +192,13 @@ describe('AiAnalysisService.analyzeDocument', () => {
       }),
     };
 
+    const geolocation = buildGeolocationMock();
     const service = new AiAnalysisService(
       prisma as any,
       buildConfigMock() as any,
       buildQueueMock() as any,
       provider as any,
+      geolocation as any,
     );
     await service.analyzeDocument('doc-1');
 
@@ -201,6 +213,7 @@ describe('AiAnalysisService.analyzeDocument', () => {
     expect(
       prisma.aIAnalysis.create.mock.calls[0][0].data.errorMessage,
     ).toContain('não segue o schema esperado');
+    expect(geolocation.enqueueResolution).not.toHaveBeenCalled();
   });
 
   it('marks the analysis FAILED when the provider call throws', async () => {
@@ -213,14 +226,17 @@ describe('AiAnalysisService.analyzeDocument', () => {
         .mockRejectedValue(new Error('Gemini API returned HTTP 429')),
     };
 
+    const geolocation = buildGeolocationMock();
     const service = new AiAnalysisService(
       prisma as any,
       buildConfigMock() as any,
       buildQueueMock() as any,
       provider as any,
+      geolocation as any,
     );
     await service.analyzeDocument('doc-1');
 
+    expect(geolocation.enqueueResolution).not.toHaveBeenCalled();
     expect(prisma.aIAnalysis.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         status: 'FAILED',
@@ -242,6 +258,7 @@ describe('AiAnalysisService.analyzeDocument', () => {
       buildConfigMock() as any,
       buildQueueMock() as any,
       provider as any,
+      buildGeolocationMock() as any,
     );
     await service.analyzeDocument('doc-1');
 
@@ -260,6 +277,7 @@ describe('AiAnalysisService.enqueueAnalysis', () => {
       buildConfigMock() as any,
       buildQueueMock() as any,
       {} as any,
+      buildGeolocationMock() as any,
     );
     await expect(service.enqueueAnalysis('missing')).rejects.toThrow(
       NotFoundException,
@@ -278,6 +296,7 @@ describe('AiAnalysisService.enqueueAnalysis', () => {
       buildConfigMock() as any,
       buildQueueMock() as any,
       {} as any,
+      buildGeolocationMock() as any,
     );
     await expect(service.enqueueAnalysis('doc-1')).rejects.toThrow(
       BadRequestException,
@@ -294,6 +313,7 @@ describe('AiAnalysisService.enqueueAnalysis', () => {
       buildConfigMock() as any,
       queue as any,
       {} as any,
+      buildGeolocationMock() as any,
     );
     const result = await service.enqueueAnalysis('doc-1');
 

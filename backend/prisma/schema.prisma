@@ -153,6 +153,7 @@ model Municipality {
 
   opportunities     Opportunity[]
   favoritedBy       UserFavoriteLocation[]
+  opportunityLinks  OpportunityMunicipality[]
 
   @@map("municipalities")
 }
@@ -176,6 +177,7 @@ model Opportunity {
   registrationEndAt      DateTime?          @map("registration_end_at")
   publishedAt            DateTime?          @map("published_at")
   status                 OpportunityStatus  @default(UNKNOWN)
+  coversEntireState      Boolean            @default(false) @map("covers_entire_state")
   rawData                Json?              @map("raw_data")
   contentHash            String             @map("content_hash")
   lastScrapedAt          DateTime?          @map("last_scraped_at")
@@ -186,10 +188,11 @@ model Opportunity {
   category     Category?     @relation(fields: [categoryId], references: [id])
   municipality Municipality? @relation(fields: [municipalityId], references: [id])
 
-  documents         Document[]
-  aiAnalyses        AIAnalysis[]
-  requiredDocuments RequiredDocument[]
-  notifications     Notification[]
+  documents             Document[]
+  aiAnalyses            AIAnalysis[]
+  requiredDocuments     RequiredDocument[]
+  notifications         Notification[]
+  municipalityLinks     OpportunityMunicipality[]
 
   @@unique([sourceId, externalId])
   @@index([status])
@@ -266,6 +269,21 @@ model RequiredDocument {
 
   @@index([opportunityId])
   @@map("required_documents")
+}
+
+model OpportunityMunicipality {
+  id             String   @id @default(uuid())
+  opportunityId  String   @map("opportunity_id")
+  municipalityId String   @map("municipality_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  opportunity  Opportunity  @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  municipality Municipality @relation(fields: [municipalityId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, municipalityId])
+  @@index([opportunityId])
+  @@index([municipalityId])
+  @@map("opportunity_municipalities")
 }
 
 model UserFavoriteLocation {

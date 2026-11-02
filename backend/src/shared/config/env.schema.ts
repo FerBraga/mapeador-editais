@@ -17,6 +17,9 @@ export const envSchema = z.object({
   AI_MAX_INPUT_CHARS: z.coerce.number().int().positive().default(24000),
   GOOGLE_AI_API_KEY: z.string().min(1).optional(),
   OPEN_AI_API_KEY: z.string().min(1).optional(),
+
+  // Municipality name resolution (geolocation module)
+  GEOLOCATION_MATCH_THRESHOLD: z.coerce.number().min(0).max(1).default(0.65),
 });
 
 export type Env = z.infer<typeof envSchema>;

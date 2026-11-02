@@ -5,7 +5,7 @@ Schema Prisma completo com todas as entidades do domínio, tipos geográficos Po
 ## Requirements
 
 ### Requirement: Schema Prisma Completo do Domínio
-O sistema SHALL definir, via Prisma, o schema completo das entidades do domínio descritas no planejamento do produto: `User`, `Source`, `ScraperExecution`, `Category`, `Municipality`, `Opportunity`, `Document`, `AIAnalysis`, `RequiredDocument`, `UserFavoriteLocation` e `Notification`, incluindo seus campos, enums de status e relacionamentos entre entidades.
+O sistema SHALL definir, via Prisma, o schema completo das entidades do domínio descritas no planejamento do produto: `User`, `Source`, `ScraperExecution`, `Category`, `Municipality`, `Opportunity`, `Document`, `AIAnalysis`, `RequiredDocument`, `OpportunityMunicipality`, `UserFavoriteLocation` e `Notification`, incluindo seus campos, enums de status e relacionamentos entre entidades.
 
 #### Scenario: Geração do Prisma Client
 - **WHEN** o comando `prisma generate` é executado sobre o schema

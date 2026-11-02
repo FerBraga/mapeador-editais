@@ -27,6 +27,7 @@ import {
 } from './extraction-schema';
 import { PROMPT_VERSION } from './prompt';
 import { truncateText } from './text-truncation';
+import { GeolocationService } from '../geolocation/geolocation.service';
 
 @Injectable()
 export class AiAnalysisService {
@@ -37,6 +38,7 @@ export class AiAnalysisService {
     private readonly config: ConfigService<Env, true>,
     @InjectQueue(AI_ANALYSIS_QUEUE) private readonly queue: Queue,
     @Inject(AI_PROVIDER) private readonly provider: AiProvider,
+    private readonly geolocation: GeolocationService,
   ) {}
 
   async enqueueAnalysis(documentId: string): Promise<{ jobId: string }> {
@@ -114,6 +116,8 @@ export class AiAnalysisService {
       result,
       parsed.data,
     );
+
+    await this.geolocation.enqueueResolution(document.opportunityId);
   }
 
   private async persistFailedAnalysis(

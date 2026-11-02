@@ -7,11 +7,13 @@ import { AI_ANALYSIS_QUEUE } from './ai-analysis.constants';
 import { AI_PROVIDER } from './ai-provider.interface';
 import { GeminiProvider } from './gemini-provider';
 import { Env } from '../../shared/config/env.schema';
+import { GeolocationModule } from '../geolocation/geolocation.module';
 
 @Module({
   imports: [
     BullModule.registerQueue({ name: AI_ANALYSIS_QUEUE }),
     ConfigModule,
+    GeolocationModule,
   ],
   controllers: [AiAnalysisController],
   providers: [
