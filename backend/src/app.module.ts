@@ -15,6 +15,7 @@ import { DocumentsModule } from './modules/documents/documents.module';
 import { AiAnalysisModule } from './modules/ai-analysis/ai-analysis.module';
 import { GeolocationModule } from './modules/geolocation/geolocation.module';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { MunicipalitiesModule } from './modules/municipalities/municipalities.module';
 import { AlertsModule } from './modules/alerts/alerts.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 
@@ -34,6 +35,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     AiAnalysisModule,
     GeolocationModule,
     CategoriesModule,
+    MunicipalitiesModule,
     AlertsModule,
     NotificationsModule,
   ],
