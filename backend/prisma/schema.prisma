@@ -256,6 +256,7 @@ model RequiredDocument {
   description        String?
   documentCategory   RequiredDocumentCategory @map("document_category")
   isMandatory        Boolean                  @default(true) @map("is_mandatory")
+  evidence           String?
   sourceDocumentId   String?                  @map("source_document_id")
   sourcePage         Int?                     @map("source_page")
   createdAt          DateTime                 @default(now()) @map("created_at")

@@ -1,3 +1,4 @@
 import { bootstrapWorker } from './bootstrap-worker';
+import { AiAnalysisWorkerModule } from './ai-analysis-worker.module';
 
-bootstrapWorker('AiAnalysisWorker');
+bootstrapWorker('AiAnalysisWorker', AiAnalysisWorkerModule);
