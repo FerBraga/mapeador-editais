@@ -42,13 +42,13 @@ export default function OpportunityDetailPage() {
   const requiredDocuments = dedupeRequiredDocuments(opportunity.requiredDocuments)
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6 p-6">
+    <div className="mx-auto flex max-w-3xl flex-col gap-6 p-4 sm:p-6">
       <Link to="/" className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'w-fit' })}>
         ← Voltar ao mapa
       </Link>
 
       <header className="flex flex-col gap-2">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <h1 className="text-2xl font-semibold text-foreground">{opportunity.title}</h1>
           {opportunity.coversEntireState && <Badge variant="accent">Edital estadual</Badge>}
         </div>
@@ -69,7 +69,7 @@ export default function OpportunityDetailPage() {
         </a>
       </header>
 
-      <section className="grid grid-cols-2 gap-4 rounded-lg border border-border bg-card p-4 text-sm">
+      <section className="grid grid-cols-1 gap-4 rounded-lg border border-border bg-card p-4 text-sm sm:grid-cols-2">
         <div>
           <p className="text-xs text-muted-foreground">Faixa de valores</p>
           <p>{fundingRange ?? 'Não informado'}</p>
@@ -109,7 +109,7 @@ export default function OpportunityDetailPage() {
           <h2 className="text-sm font-semibold text-foreground">Documentos exigidos</h2>
           <ul className="flex flex-col gap-2">
             {requiredDocuments.map((doc) => (
-              <li key={doc.id} className="flex items-start justify-between gap-3 rounded-lg border border-border p-2.5 text-sm">
+              <li key={doc.id} className="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-border p-2.5 text-sm">
                 <div>
                   <p>{doc.name}</p>
                   <p className="text-xs text-muted-foreground">

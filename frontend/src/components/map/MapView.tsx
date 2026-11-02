@@ -1,5 +1,6 @@
 import 'leaflet/dist/leaflet.css'
-import { CircleMarker, MapContainer, TileLayer, Tooltip } from 'react-leaflet'
+import { useEffect } from 'react'
+import { CircleMarker, MapContainer, TileLayer, Tooltip, useMap } from 'react-leaflet'
 import type { Municipality } from '@/types/api'
 
 const PARANA_CENTER: [number, number] = [-24.68, -51.4]
@@ -15,17 +16,33 @@ function radiusFor(opportunityCount: number, maxCount: number): number {
   return MIN_RADIUS + scale * (MAX_RADIUS - MIN_RADIUS)
 }
 
+/**
+ * A Leaflet map mounted while its container is hidden (e.g. behind an
+ * inactive mobile tab) freezes its tile layout at a 0x0 size. Re-measuring
+ * on every change of `trigger` (the active tab) fixes the map up once the
+ * container becomes visible again.
+ */
+function InvalidateSizeOnChange({ trigger }: { trigger: unknown }) {
+  const map = useMap()
+  useEffect(() => {
+    map.invalidateSize()
+  }, [trigger, map])
+  return null
+}
+
 interface MapViewProps {
   municipalities: Municipality[]
   selectedMunicipalityId: string | undefined
   onSelectMunicipality: (municipalityId: string) => void
+  resizeTrigger?: unknown
 }
 
-export function MapView({ municipalities, selectedMunicipalityId, onSelectMunicipality }: MapViewProps) {
+export function MapView({ municipalities, selectedMunicipalityId, onSelectMunicipality, resizeTrigger }: MapViewProps) {
   const maxCount = municipalities.reduce((max, m) => Math.max(max, m.opportunityCount), 0)
 
   return (
     <MapContainer center={PARANA_CENTER} zoom={DEFAULT_ZOOM} className="h-full w-full" scrollWheelZoom>
+      <InvalidateSizeOnChange trigger={resizeTrigger} />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

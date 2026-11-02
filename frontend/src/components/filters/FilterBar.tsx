@@ -4,6 +4,7 @@ import { useSources } from '@/hooks/use-sources'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
+import { cn } from '@/lib/utils'
 import type { OpportunityListFilters } from '@/types/api'
 
 interface FilterBarProps {
@@ -17,6 +18,7 @@ export function FilterBar({ filters, onChange, selectedMunicipalityName, onClear
   const { data: categories } = useCategories()
   const { data: sources } = useSources()
 
+  const [expanded, setExpanded] = useState(false)
   const [q, setQ] = useState(filters.q ?? '')
   const [fundingMin, setFundingMin] = useState(filters.fundingMin?.toString() ?? '')
   const [fundingMax, setFundingMax] = useState(filters.fundingMax?.toString() ?? '')
@@ -31,7 +33,18 @@ export function FilterBar({ filters, onChange, selectedMunicipalityName, onClear
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3 border-b border-border bg-background p-3">
+    <div className="border-b border-border bg-background">
+      <div className="flex items-center justify-between px-3 py-2 lg:hidden">
+        <span className="text-sm font-medium text-foreground">Filtros</span>
+        <Button type="button" variant="outline" size="sm" onClick={() => setExpanded((prev) => !prev)}>
+          {expanded ? 'Ocultar filtros' : 'Mostrar filtros'}
+        </Button>
+      </div>
+
+      <form
+        onSubmit={handleSubmit}
+        className={cn('flex flex-wrap items-end gap-3 p-3', expanded ? 'flex' : 'hidden', 'lg:flex')}
+      >
       <div className="flex min-w-48 flex-1 flex-col gap-1">
         <label htmlFor="q" className="text-xs font-medium text-muted-foreground">
           Buscar
@@ -127,6 +140,7 @@ export function FilterBar({ filters, onChange, selectedMunicipalityName, onClear
           Limpar município: {selectedMunicipalityName}
         </Button>
       )}
-    </form>
+      </form>
+    </div>
   )
 }
