@@ -36,7 +36,13 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`)
+  const response = await fetch(`${API_URL}${path}`, {
+    headers: {
+      // Skips the free-tier ngrok interstitial warning page, which would
+      // otherwise return HTML instead of the JSON every caller here expects.
+      'ngrok-skip-browser-warning': 'true',
+    },
+  })
   if (!response.ok) {
     const body = (await response.json().catch(() => null)) as ApiErrorResponse | null
     const message = body
