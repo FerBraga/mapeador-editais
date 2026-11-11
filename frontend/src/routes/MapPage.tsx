@@ -12,7 +12,7 @@ export default function MapPage() {
   const { filters, setFilters, setPage } = useOpportunityFilters()
   const municipalitiesQuery = useMunicipalities()
   const opportunitiesQuery = useOpportunities(filters)
-  const [view, setView] = useState<'map' | 'list'>('list')
+  const [view, setView] = useState<'map' | 'list'>('map')
 
   const selectedMunicipality = municipalitiesQuery.data?.find((m) => m.id === filters.municipalityId)
 
@@ -46,7 +46,10 @@ export default function MapPage() {
             <MapView
               municipalities={municipalitiesQuery.data}
               selectedMunicipalityId={filters.municipalityId}
-              onSelectMunicipality={(municipalityId) => setFilters({ municipalityId })}
+              onSelectMunicipality={(municipalityId) => {
+                setFilters({ municipalityId })
+                setView('list')
+              }}
               resizeTrigger={view}
             />
           )}
