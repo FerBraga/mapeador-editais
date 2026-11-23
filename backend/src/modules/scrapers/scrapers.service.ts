@@ -1,12 +1,13 @@
 import { ConflictException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { Prisma, ScraperExecutionStatus } from '@prisma/client';
+import { Prisma, ScraperExecutionStatus, Source } from '@prisma/client';
 import { PrismaService } from '../../shared/database/prisma.service';
 import { DocumentsService } from '../documents/documents.service';
 import { NOTICE_SCRAPERS, NoticeScraper } from './contracts/notice-scraper.interface';
 import { ScraperNormalizationService } from './scraper-normalization.service';
 import { SCRAPERS_QUEUE, RUN_SOURCE_JOB } from './scrapers.constants';
+import { SOURCE_TYPE_TO_CATEGORY_SLUG } from './source-category-mapping';
 
 export type ScraperRunSummary = {
   executionId: string;
@@ -81,7 +82,7 @@ export class ScrapersService {
         try {
           const details = await scraper.fetchOpportunityDetails(rawOpportunity.externalId);
           const normalized = this.normalization.normalize(details);
-          const result = await this.upsertOpportunity(source.id, scraperKey, normalized);
+          const result = await this.upsertOpportunity(source, scraperKey, normalized);
           if (result === 'created') itemsCreated += 1;
           if (result === 'updated') itemsUpdated += 1;
         } catch (error) {
@@ -138,19 +139,22 @@ export class ScrapersService {
   }
 
   private async upsertOpportunity(
-    sourceId: string,
+    source: Pick<Source, 'id' | 'sourceType'>,
     scraperKey: string,
     normalized: ReturnType<ScraperNormalizationService['normalize']>,
   ): Promise<'created' | 'updated' | 'unchanged'> {
+    const sourceId = source.id;
     const existing = await this.prisma.opportunity.findUnique({
       where: { sourceId_externalId: { sourceId, externalId: normalized.externalId } },
     });
 
     if (!existing) {
+      const categoryId = await this.resolveCategoryId(source.sourceType);
       const opportunity = await this.prisma.opportunity.create({
         data: {
           sourceId,
           externalId: normalized.externalId,
+          categoryId,
           title: normalized.title,
           slug: this.buildSlug(scraperKey, normalized.externalId),
           issuingOrganization: normalized.issuingOrganization,
@@ -173,9 +177,11 @@ export class ScrapersService {
       return 'unchanged';
     }
 
+    const categoryId = await this.resolveCategoryId(source.sourceType);
     await this.prisma.opportunity.update({
       where: { id: existing.id },
       data: {
+        categoryId,
         title: normalized.title,
         issuingOrganization: normalized.issuingOrganization,
         description: normalized.description,
@@ -187,6 +193,23 @@ export class ScrapersService {
     });
     await this.createPendingDocuments(existing.id, normalized.attachments);
     return 'updated';
+  }
+
+  /**
+   * Resolves the Category to assign based on the source's sourceType.
+   * Returns null (instead of throwing) if the mapped slug isn't seeded -
+   * a missing category shouldn't fail the whole scraping run.
+   */
+  private async resolveCategoryId(sourceType: Source['sourceType']): Promise<string | null> {
+    const slug = SOURCE_TYPE_TO_CATEGORY_SLUG[sourceType];
+    const category = await this.prisma.category.findUnique({ where: { slug } });
+    if (!category) {
+      this.logger.warn(
+        `No category found for slug "${slug}" (sourceType "${sourceType}") - opportunity will be saved without a category`,
+      );
+      return null;
+    }
+    return category.id;
   }
 
   private async createPendingDocuments(

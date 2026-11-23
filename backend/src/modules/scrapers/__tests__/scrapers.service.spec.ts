@@ -23,6 +23,9 @@ function buildPrismaMock() {
       findFirst: jest.fn(),
       create: jest.fn(),
     },
+    category: {
+      findUnique: jest.fn().mockResolvedValue({ id: 'category-cultura' }),
+    },
     $transaction: jest.fn((operations: unknown[]) => Promise.all(operations)),
   };
 }
@@ -54,7 +57,7 @@ class FakeScraper implements NoticeScraper {
   }
 }
 
-const SOURCE = { id: 'source-1', scraperKey: 'fake-source' };
+const SOURCE = { id: 'source-1', scraperKey: 'fake-source', sourceType: 'CULTURE' };
 
 describe('ScrapersService', () => {
   it('creates a new opportunity and its attachments when none existed before', async () => {
@@ -95,6 +98,105 @@ describe('ScrapersService', () => {
     expect(prisma.opportunity.create).toHaveBeenCalledTimes(1);
     expect(documents.enqueueNewDocument).toHaveBeenCalledWith('doc-1');
     expect(prisma.document.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('resolves categoryId from the source sourceType when creating a new opportunity', async () => {
+    const prisma = buildPrismaMock();
+    prisma.source.findUnique.mockResolvedValue(SOURCE);
+    prisma.scraperExecution.findFirst.mockResolvedValue(null);
+    prisma.scraperExecution.create.mockResolvedValue({ id: 'exec-1' });
+    prisma.opportunity.findUnique.mockResolvedValue(null);
+    prisma.opportunity.create.mockResolvedValue({ id: 'opp-1' });
+    prisma.document.findFirst.mockResolvedValue(null);
+    prisma.category.findUnique.mockResolvedValue({ id: 'category-cultura' });
+
+    const scraper = new FakeScraper(
+      [{ externalId: 'ext-1', title: 'Edital 1', officialUrl: 'https://example.test/1' }],
+      { 'ext-1': { externalId: 'ext-1', title: 'Edital 1', officialUrl: 'https://example.test/1', attachments: [] } },
+    );
+
+    const service = new ScrapersService(
+      prisma as any,
+      new ScraperNormalizationService(),
+      buildDocumentsServiceMock() as any,
+      [scraper],
+      buildQueueMock() as any,
+    );
+
+    await service.runSource('fake-source');
+
+    expect(prisma.category.findUnique).toHaveBeenCalledWith({ where: { slug: 'cultura' } });
+    expect(prisma.opportunity.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ categoryId: 'category-cultura' }) }),
+    );
+  });
+
+  it('saves the opportunity without a category (not a failure) when the mapped slug has no seeded Category', async () => {
+    const prisma = buildPrismaMock();
+    prisma.source.findUnique.mockResolvedValue(SOURCE);
+    prisma.scraperExecution.findFirst.mockResolvedValue(null);
+    prisma.scraperExecution.create.mockResolvedValue({ id: 'exec-1' });
+    prisma.opportunity.findUnique.mockResolvedValue(null);
+    prisma.opportunity.create.mockResolvedValue({ id: 'opp-1' });
+    prisma.document.findFirst.mockResolvedValue(null);
+    prisma.category.findUnique.mockResolvedValue(null);
+
+    const scraper = new FakeScraper(
+      [{ externalId: 'ext-1', title: 'Edital 1', officialUrl: 'https://example.test/1' }],
+      { 'ext-1': { externalId: 'ext-1', title: 'Edital 1', officialUrl: 'https://example.test/1', attachments: [] } },
+    );
+
+    const service = new ScrapersService(
+      prisma as any,
+      new ScraperNormalizationService(),
+      buildDocumentsServiceMock() as any,
+      [scraper],
+      buildQueueMock() as any,
+    );
+
+    const summary = await service.runSource('fake-source');
+
+    expect(summary.status).toBe('COMPLETED');
+    expect(prisma.opportunity.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ categoryId: null }) }),
+    );
+  });
+
+  it('recalculates categoryId from the current sourceType when updating a changed opportunity', async () => {
+    const prisma = buildPrismaMock();
+    prisma.source.findUnique.mockResolvedValue({ ...SOURCE, sourceType: 'INNOVATION' });
+    prisma.scraperExecution.findFirst.mockResolvedValue(null);
+    prisma.scraperExecution.create.mockResolvedValue({ id: 'exec-1' });
+    prisma.opportunity.findUnique.mockResolvedValue({ id: 'opp-1', contentHash: 'stale-hash' });
+    prisma.document.findFirst.mockResolvedValue(null);
+    prisma.category.findUnique.mockResolvedValue({ id: 'category-inovacao' });
+
+    const scraper = new FakeScraper(
+      [{ externalId: 'ext-1', title: 'Edital 1 atualizado', officialUrl: 'https://example.test/1' }],
+      {
+        'ext-1': {
+          externalId: 'ext-1',
+          title: 'Edital 1 atualizado',
+          officialUrl: 'https://example.test/1',
+          attachments: [],
+        },
+      },
+    );
+
+    const service = new ScrapersService(
+      prisma as any,
+      new ScraperNormalizationService(),
+      buildDocumentsServiceMock() as any,
+      [scraper],
+      buildQueueMock() as any,
+    );
+
+    await service.runSource('fake-source');
+
+    expect(prisma.category.findUnique).toHaveBeenCalledWith({ where: { slug: 'inovacao-e-tecnologia' } });
+    expect(prisma.opportunity.update).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ categoryId: 'category-inovacao' }) }),
+    );
   });
 
   it('does not duplicate or needlessly update an opportunity whose content is unchanged', async () => {

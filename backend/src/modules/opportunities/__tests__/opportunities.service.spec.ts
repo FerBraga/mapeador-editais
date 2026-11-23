@@ -34,6 +34,16 @@ describe('OpportunitiesService.findMany', () => {
     });
   });
 
+  it('filters by categoryId, so only opportunities in that category are returned', async () => {
+    const prisma = buildPrismaMock();
+    const service = new OpportunitiesService(prisma as any);
+
+    await service.findMany({ ...BASE_QUERY, categoryId: 'category-cultura' });
+
+    const where = prisma.opportunity.findMany.mock.calls[0][0].where;
+    expect(where).toEqual({ AND: [{ categoryId: 'category-cultura' }] });
+  });
+
   it('builds the onlyOpen filter from dates, excluding terminal statuses', async () => {
     const prisma = buildPrismaMock();
     const service = new OpportunitiesService(prisma as any);
