@@ -104,6 +104,31 @@ export interface Municipality {
   opportunityCount: number
 }
 
+export type UserRole = 'PROPONENTE'
+
+export interface AuthUser {
+  id: string
+  name: string
+  email: string
+  role: UserRole
+}
+
+export interface AuthResponse {
+  accessToken: string
+  user: AuthUser
+}
+
+export interface RegisterPayload {
+  name: string
+  email: string
+  password: string
+}
+
+export interface LoginPayload {
+  email: string
+  password: string
+}
+
 export interface ApiErrorResponse {
   statusCode: number
   error: string

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { MapView } from '@/components/map/MapView'
 import { FilterBar } from '@/components/filters/FilterBar'
 import { OpportunityList } from '@/components/opportunities/OpportunityList'
@@ -6,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useOpportunityFilters } from '@/hooks/use-opportunity-filters'
 import { useOpportunities } from '@/hooks/use-opportunities'
 import { useMunicipalities } from '@/hooks/use-municipalities'
+import { useAuth } from '@/lib/auth-context'
 import { cn } from '@/lib/utils'
 
 export default function MapPage() {
@@ -13,20 +15,44 @@ export default function MapPage() {
   const municipalitiesQuery = useMunicipalities()
   const opportunitiesQuery = useOpportunities(filters)
   const [view, setView] = useState<'map' | 'list'>('map')
+  const { user, isLoading: isAuthLoading, logout } = useAuth()
 
   const selectedMunicipality = municipalitiesQuery.data?.find((m) => m.id === filters.municipalityId)
 
   return (
     <div className="flex h-screen flex-col">
-      <header className="flex items-center justify-between border-b border-border bg-background px-4 py-2">
+      <header className="flex items-center justify-between gap-2 border-b border-border bg-background px-4 py-2">
         <h1 className="text-lg font-semibold text-foreground">Mapa Inteligente de Editais do Paraná</h1>
-        <div className="flex gap-1 lg:hidden">
-          <Button type="button" size="sm" variant={view === 'map' ? 'default' : 'outline'} onClick={() => setView('map')}>
-            Mapa
-          </Button>
-          <Button type="button" size="sm" variant={view === 'list' ? 'default' : 'outline'} onClick={() => setView('list')}>
-            Lista
-          </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1 lg:hidden">
+            <Button type="button" size="sm" variant={view === 'map' ? 'default' : 'outline'} onClick={() => setView('map')}>
+              Mapa
+            </Button>
+            <Button type="button" size="sm" variant={view === 'list' ? 'default' : 'outline'} onClick={() => setView('list')}>
+              Lista
+            </Button>
+          </div>
+
+          {!isAuthLoading && (
+            user ? (
+              <div className="flex items-center gap-2">
+                <span className="hidden text-sm text-muted-foreground sm:inline">Olá, {user.name}</span>
+                <Button type="button" size="sm" variant="outline" onClick={logout}>
+                  Sair
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1">
+                <Link to="/entrar" className="text-sm text-muted-foreground hover:text-foreground">
+                  Entrar
+                </Link>
+                <span className="text-sm text-muted-foreground">·</span>
+                <Link to="/cadastro" className="text-sm text-muted-foreground hover:text-foreground">
+                  Cadastre-se
+                </Link>
+              </div>
+            )
+          )}
         </div>
       </header>
 

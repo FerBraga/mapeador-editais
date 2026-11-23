@@ -1,10 +1,14 @@
 import type {
   ApiErrorResponse,
+  AuthResponse,
+  AuthUser,
   Category,
+  LoginPayload,
   Municipality,
   OpportunityDetail,
   OpportunityListFilters,
   OpportunityListResponse,
+  RegisterPayload,
   Source,
 } from '@/types/api'
 
@@ -35,13 +39,26 @@ export class ApiError extends Error {
   }
 }
 
-async function request<T>(path: string): Promise<T> {
+interface RequestOptions {
+  method?: 'GET' | 'POST'
+  body?: unknown
+  /** When set, attached as `Authorization: Bearer <token>` for authenticated endpoints. */
+  token?: string
+}
+
+async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const headers: Record<string, string> = {
+    // Skips the free-tier ngrok interstitial warning page, which would
+    // otherwise return HTML instead of the JSON every caller here expects.
+    'ngrok-skip-browser-warning': 'true',
+  }
+  if (options.body !== undefined) headers['Content-Type'] = 'application/json'
+  if (options.token) headers['Authorization'] = `Bearer ${options.token}`
+
   const response = await fetch(`${API_URL}${path}`, {
-    headers: {
-      // Skips the free-tier ngrok interstitial warning page, which would
-      // otherwise return HTML instead of the JSON every caller here expects.
-      'ngrok-skip-browser-warning': 'true',
-    },
+    method: options.method ?? 'GET',
+    headers,
+    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
   })
   if (!response.ok) {
     const body = (await response.json().catch(() => null)) as ApiErrorResponse | null
@@ -88,4 +105,16 @@ export async function fetchSources(): Promise<Source[]> {
 
 export async function fetchMunicipalities(): Promise<Municipality[]> {
   return request<Municipality[]>('/municipalities')
+}
+
+export async function registerUser(payload: RegisterPayload): Promise<AuthResponse> {
+  return request<AuthResponse>('/auth/register', { method: 'POST', body: payload })
+}
+
+export async function loginUser(payload: LoginPayload): Promise<AuthResponse> {
+  return request<AuthResponse>('/auth/login', { method: 'POST', body: payload })
+}
+
+export async function fetchMe(token: string): Promise<AuthUser | null> {
+  return request<AuthUser | null>('/auth/me', { token })
 }

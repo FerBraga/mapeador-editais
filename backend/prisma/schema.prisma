@@ -12,6 +12,10 @@ datasource db {
 // Enums
 // ---------------------------------------------------------------------------
 
+enum Role {
+  PROPONENTE
+}
+
 enum SourceType {
   PUBLIC_PROCUREMENT
   CULTURE
@@ -80,6 +84,7 @@ model User {
   name         String
   email        String   @unique
   passwordHash String   @map("password_hash")
+  role         Role     @default(PROPONENTE)
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 

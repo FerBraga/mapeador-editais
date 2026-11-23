@@ -11,6 +11,10 @@ export const envSchema = z.object({
   CORS_ORIGINS: z.string().min(1, 'CORS_ORIGINS is required'),
   STORAGE_LOCAL_DIR: z.string().default('uploads'),
 
+  // Auth (proponent-auth module)
+  JWT_SECRET: z.string().min(1, 'JWT_SECRET is required'),
+  JWT_EXPIRES_IN: z.string().default('7d'),
+
   // AI-based structured extraction (ai-analysis module)
   AI_PROVIDER: z.enum(['gemini', 'openai']).default('gemini'),
   AI_MODEL: z.string().default('gemini-3.5-flash-lite'),
