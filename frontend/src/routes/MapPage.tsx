@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { MapView } from '@/components/map/MapView'
 import { FilterBar } from '@/components/filters/FilterBar'
 import { OpportunityList } from '@/components/opportunities/OpportunityList'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { useOpportunityFilters } from '@/hooks/use-opportunity-filters'
 import { useOpportunities } from '@/hooks/use-opportunities'
 import { useMunicipalities } from '@/hooks/use-municipalities'
@@ -42,12 +42,11 @@ export default function MapPage() {
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-1">
-                <Link to="/entrar" className="text-sm text-muted-foreground hover:text-foreground">
+              <div className="flex items-center gap-2">
+                <Link to="/entrar" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
                   Entrar
                 </Link>
-                <span className="text-sm text-muted-foreground">·</span>
-                <Link to="/cadastro" className="text-sm text-muted-foreground hover:text-foreground">
+                <Link to="/cadastro" className={buttonVariants({ variant: 'default', size: 'sm' })}>
                   Cadastre-se
                 </Link>
               </div>
