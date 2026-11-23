@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { MapView } from '@/components/map/MapView'
 import { FilterBar } from '@/components/filters/FilterBar'
 import { OpportunityList } from '@/components/opportunities/OpportunityList'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { useOpportunityFilters } from '@/hooks/use-opportunity-filters'
 import { useOpportunities } from '@/hooks/use-opportunities'
 import { useMunicipalities } from '@/hooks/use-municipalities'
@@ -15,7 +14,8 @@ export default function MapPage() {
   const municipalitiesQuery = useMunicipalities()
   const opportunitiesQuery = useOpportunities(filters)
   const [view, setView] = useState<'map' | 'list'>('map')
-  const { user, isLoading: isAuthLoading, logout } = useAuth()
+  // Guaranteed non-null: MapPage only renders inside <RequireAuth>.
+  const { user, logout } = useAuth()
 
   const selectedMunicipality = municipalitiesQuery.data?.find((m) => m.id === filters.municipalityId)
 
@@ -33,25 +33,12 @@ export default function MapPage() {
             </Button>
           </div>
 
-          {!isAuthLoading && (
-            user ? (
-              <div className="flex items-center gap-2">
-                <span className="hidden text-sm text-muted-foreground sm:inline">Olá, {user.name}</span>
-                <Button type="button" size="sm" variant="outline" onClick={logout}>
-                  Sair
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link to="/entrar" className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-                  Entrar
-                </Link>
-                <Link to="/cadastro" className={buttonVariants({ variant: 'default', size: 'sm' })}>
-                  Cadastre-se
-                </Link>
-              </div>
-            )
-          )}
+          <div className="flex items-center gap-2">
+            <span className="hidden text-sm text-muted-foreground sm:inline">Olá, {user?.name}</span>
+            <Button type="button" size="sm" variant="outline" onClick={logout}>
+              Sair
+            </Button>
+          </div>
         </div>
       </header>
 

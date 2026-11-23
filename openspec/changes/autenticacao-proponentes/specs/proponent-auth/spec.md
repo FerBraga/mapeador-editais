@@ -41,6 +41,17 @@ O sistema SHALL expor um mecanismo (guard) para proteger rotas que exigem um pro
 - **WHEN** uma requisição a uma rota protegida inclui um token JWT expirado, malformado, ou com assinatura inválida
 - **THEN** o sistema rejeita a requisição com erro 401
 
+### Requirement: Acesso ao mapa exige sessão autenticada
+O sistema SHALL exigir uma sessão de proponente autenticado para acessar o mapa de descoberta de editais e o detalhe de uma oportunidade. Um visitante sem sessão válida SHALL ver uma tela de boas-vindas, com atalhos para login e cadastro, em vez do conteúdo protegido.
+
+#### Scenario: Visitante sem sessão é recebido pela tela de boas-vindas
+- **WHEN** um visitante sem token válido acessa a rota do mapa ou de um edital
+- **THEN** o sistema exibe a tela de boas-vindas (com botões "Entrar" e "Cadastre-se"), sem renderizar o mapa nem o detalhe do edital
+
+#### Scenario: Proponente autenticado acessa o conteúdo normalmente
+- **WHEN** um proponente com sessão válida acessa a rota do mapa ou de um edital
+- **THEN** o sistema renderiza o conteúdo normalmente, sem exibir a tela de boas-vindas
+
 ### Requirement: Sessão no frontend
 O frontend SHALL manter o estado de autenticação do proponente (token e dados básicos do usuário) disponível para toda a aplicação após login ou cadastro, persistindo-o entre recarregamentos de página, e SHALL permitir logout explícito.
 

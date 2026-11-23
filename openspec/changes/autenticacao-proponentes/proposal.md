@@ -8,6 +8,7 @@ O descritivo de produto do MVP prevê um "Copiloto de Escrita" — assistente de
 - Emite um JWT assinado no login/cadastro; o frontend guarda o token e o envia em `Authorization: Bearer` nas chamadas autenticadas.
 - Implementa guard/middleware no backend para proteger rotas autenticadas (preparação para os endpoints do wizard, que ainda não existem).
 - Adiciona telas de cadastro e login no frontend (React), com estado de sessão simples (token + dados básicos do usuário) acessível pelo resto da aplicação.
+- Adiciona uma tela de boas-vindas (logo, botão "Entrar" e botão "Cadastre-se") como porta de entrada: o mapa e o detalhe de edital exigem sessão autenticada — um visitante sem conta vê a tela de boas-vindas em vez do mapa, em vez de poder navegar/buscar editais livremente antes de se cadastrar.
 - Fora de escopo, por decisão explícita do usuário: verificação de e-mail, fluxo de "esqueci minha senha", cadastro/perfil de empresas patrocinadoras, painel administrativo e qualquer sistema de papéis/permissões além de "proponente autenticado" — tudo isso fica para depois da validação do MVP.
 
 ## Capabilities

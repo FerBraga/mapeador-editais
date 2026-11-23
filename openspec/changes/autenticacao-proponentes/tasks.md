@@ -27,6 +27,7 @@
 - [x] 4.4 Criar rota/tela de login (`frontend/src/routes/LoginPage.tsx`, rota `/entrar`)
 - [x] 4.5 Anexar o token automaticamente como header `Authorization: Bearer` nas chamadas autenticadas do cliente HTTP (`request()` em `api.ts` aceita `token`; usado hoje por `fetchMe`, pronto para os endpoints do wizard)
 - [x] 4.6 Exibir estado de sessão (ex.: nome do usuário / botão de logout) em algum ponto visível da UI existente (ex.: `App.tsx` ou header do mapa) — adicionado ao header do `MapPage`
+- [x] 4.7 (ajuste pós-feedback do usuário) Criar `WelcomePage` (logo, botão "Entrar", botão "Cadastre-se" centralizados) e um `RequireAuth` que gatekeeia as rotas `/` e `/editais/:id`, exibindo a `WelcomePage` em vez do conteúdo quando não há sessão — buscar/visualizar editais passou a exigir conta
 
 ## 5. Validação manual
 
