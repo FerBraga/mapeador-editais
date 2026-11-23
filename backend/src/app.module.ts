@@ -18,6 +18,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { MunicipalitiesModule } from './modules/municipalities/municipalities.module';
 import { AlertsModule } from './modules/alerts/alerts.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ProjectDraftsModule } from './modules/project-drafts/project-drafts.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     MunicipalitiesModule,
     AlertsModule,
     NotificationsModule,
+    ProjectDraftsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

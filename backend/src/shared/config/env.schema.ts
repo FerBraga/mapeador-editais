@@ -24,6 +24,11 @@ export const envSchema = z.object({
 
   // Municipality name resolution (geolocation module)
   GEOLOCATION_MATCH_THRESHOLD: z.coerce.number().min(0).max(1).default(0.65),
+
+  // Writing wizard (project-drafts module) - conservative defaults to contain
+  // AI call volume/cost per user.
+  WIZARD_MAX_SECTION_REGENERATIONS: z.coerce.number().int().min(0).default(2),
+  WIZARD_MAX_QUESTIONS_PER_OPPORTUNITY: z.coerce.number().int().min(0).default(3),
 });
 
 export type Env = z.infer<typeof envSchema>;

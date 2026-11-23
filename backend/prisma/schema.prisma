@@ -16,6 +16,13 @@ enum Role {
   PROPONENTE
 }
 
+enum ProjectDraftSectionKey {
+  JUSTIFICATIVA
+  OBJETIVOS
+  CONTRAPARTIDAS
+  ORCAMENTO
+}
+
 enum SourceType {
   PUBLIC_PROCUREMENT
   CULTURE
@@ -90,6 +97,7 @@ model User {
 
   favoriteLocations UserFavoriteLocation[]
   notifications     Notification[]
+  projectDrafts     ProjectDraft[]
 
   @@map("users")
 }
@@ -198,6 +206,7 @@ model Opportunity {
   requiredDocuments     RequiredDocument[]
   notifications         Notification[]
   municipalityLinks     OpportunityMunicipality[]
+  projectDrafts         ProjectDraft[]
 
   @@unique([sourceId, externalId])
   @@index([status])
@@ -318,4 +327,49 @@ model Notification {
 
   @@unique([userId, opportunityId, type])
   @@map("notifications")
+}
+
+model ProjectDraft {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  opportunityId String   @map("opportunity_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user        User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  opportunity Opportunity            @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  sections    ProjectDraftSectionEntry[]
+  questions   ProjectDraftQuestion[]
+
+  @@unique([userId, opportunityId])
+  @@map("project_drafts")
+}
+
+model ProjectDraftSectionEntry {
+  id                String                 @id @default(uuid())
+  draftId           String                 @map("draft_id")
+  section           ProjectDraftSectionKey
+  answers           Json?
+  generatedText     String?                @map("generated_text")
+  regenerationCount Int                    @default(0) @map("regeneration_count")
+  createdAt         DateTime               @default(now()) @map("created_at")
+  updatedAt         DateTime               @updatedAt @map("updated_at")
+
+  draft ProjectDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  @@unique([draftId, section])
+  @@map("project_draft_sections")
+}
+
+model ProjectDraftQuestion {
+  id        String   @id @default(uuid())
+  draftId   String   @map("draft_id")
+  question  String
+  answer    String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  draft ProjectDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  @@index([draftId])
+  @@map("project_draft_questions")
 }

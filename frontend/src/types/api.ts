@@ -129,6 +129,38 @@ export interface LoginPayload {
   password: string
 }
 
+export type ProjectDraftSectionKey = 'JUSTIFICATIVA' | 'OBJETIVOS' | 'CONTRAPARTIDAS' | 'ORCAMENTO'
+
+export interface ProjectDraftSectionQuestion {
+  key: string
+  label: string
+}
+
+export interface ProjectDraftSectionState {
+  section: ProjectDraftSectionKey
+  title: string
+  questions: ProjectDraftSectionQuestion[]
+  answers: Record<string, string> | null
+  generatedText: string | null
+  regenerationsUsed: number
+  maxRegenerations: number
+}
+
+export interface ProjectDraftQuestionEntry {
+  id: string
+  question: string
+  answer: string
+  createdAt: string
+}
+
+export interface ProjectDraftState {
+  draftId: string
+  sections: ProjectDraftSectionState[]
+  questions: ProjectDraftQuestionEntry[]
+  questionsUsed: number
+  maxQuestions: number
+}
+
 export interface ApiErrorResponse {
   statusCode: number
   error: string

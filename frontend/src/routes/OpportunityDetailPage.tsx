@@ -138,6 +138,12 @@ export default function OpportunityDetailPage() {
           </p>
         </section>
       )}
+
+      {opportunity.latestAnalysis && (
+        <Link to={`/editais/${opportunity.id}/escrever`} className={buttonVariants({ className: 'w-fit' })}>
+          Escrever meu projeto com ajuda da IA
+        </Link>
+      )}
     </div>
   )
 }

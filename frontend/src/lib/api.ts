@@ -8,6 +8,10 @@ import type {
   OpportunityDetail,
   OpportunityListFilters,
   OpportunityListResponse,
+  ProjectDraftQuestionEntry,
+  ProjectDraftSectionKey,
+  ProjectDraftSectionState,
+  ProjectDraftState,
   RegisterPayload,
   Source,
 } from '@/types/api'
@@ -40,7 +44,7 @@ export class ApiError extends Error {
 }
 
 interface RequestOptions {
-  method?: 'GET' | 'POST'
+  method?: 'GET' | 'POST' | 'PUT'
   body?: unknown
   /** When set, attached as `Authorization: Bearer <token>` for authenticated endpoints. */
   token?: string
@@ -117,4 +121,44 @@ export async function loginUser(payload: LoginPayload): Promise<AuthResponse> {
 
 export async function fetchMe(token: string): Promise<AuthUser | null> {
   return request<AuthUser | null>('/auth/me', { token })
+}
+
+export async function fetchProjectDraft(opportunityId: string, token: string): Promise<ProjectDraftState> {
+  return request<ProjectDraftState>(`/project-drafts/${opportunityId}`, { token })
+}
+
+export async function submitProjectDraftSection(
+  opportunityId: string,
+  section: ProjectDraftSectionKey,
+  answers: Record<string, string>,
+  token: string,
+): Promise<ProjectDraftSectionState> {
+  return request<ProjectDraftSectionState>(`/project-drafts/${opportunityId}/sections/${section}`, {
+    method: 'PUT',
+    body: { answers },
+    token,
+  })
+}
+
+export async function regenerateProjectDraftSection(
+  opportunityId: string,
+  section: ProjectDraftSectionKey,
+  token: string,
+): Promise<ProjectDraftSectionState> {
+  return request<ProjectDraftSectionState>(`/project-drafts/${opportunityId}/sections/${section}/regenerate`, {
+    method: 'POST',
+    token,
+  })
+}
+
+export async function askProjectDraftQuestion(
+  opportunityId: string,
+  question: string,
+  token: string,
+): Promise<ProjectDraftQuestionEntry> {
+  return request<ProjectDraftQuestionEntry>(`/project-drafts/${opportunityId}/questions`, {
+    method: 'POST',
+    body: { question },
+    token,
+  })
 }

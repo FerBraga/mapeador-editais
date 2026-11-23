@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Env } from '../../shared/config/env.schema';
-import { AiExtractionCallResult, AiProvider } from './ai-provider.interface';
+import {
+  AiExtractionCallResult,
+  AiGenerationCallResult,
+  AiProvider,
+} from './ai-provider.interface';
 import { GEMINI_RESPONSE_SCHEMA, SYSTEM_PROMPT } from './prompt';
 
 const GEMINI_ENDPOINT =
@@ -70,6 +74,54 @@ export class GeminiProvider implements AiProvider {
 
     return {
       raw,
+      tokensInput: json.usageMetadata?.promptTokenCount ?? 0,
+      tokensOutput: json.usageMetadata?.candidatesTokenCount ?? 0,
+      model,
+    };
+  }
+
+  async generateText(
+    systemPrompt: string,
+    userContent: string,
+  ): Promise<AiGenerationCallResult> {
+    const apiKey = this.config.get('GOOGLE_AI_API_KEY', { infer: true });
+    if (!apiKey) {
+      throw new Error('GOOGLE_AI_API_KEY is not configured');
+    }
+    const model = this.config.get('AI_MODEL', { infer: true });
+
+    const body = {
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ role: 'user', parts: [{ text: userContent }] }],
+      generationConfig: { temperature: 0.4 },
+    };
+
+    const response = await fetch(
+      `${GEMINI_ENDPOINT}/${model}:generateContent`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey,
+        },
+        body: JSON.stringify(body),
+      },
+    );
+
+    const json = await response.json();
+    if (!response.ok) {
+      const message =
+        json?.error?.message ?? `Gemini API returned HTTP ${response.status}`;
+      throw new Error(message);
+    }
+
+    const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) {
+      throw new Error('Gemini API returned no content');
+    }
+
+    return {
+      text,
       tokensInput: json.usageMetadata?.promptTokenCount ?? 0,
       tokensOutput: json.usageMetadata?.candidatesTokenCount ?? 0,
       model,

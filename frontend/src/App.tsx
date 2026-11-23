@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 import { RequireAuth } from '@/components/auth/RequireAuth'
 import MapPage from '@/routes/MapPage'
 import OpportunityDetailPage from '@/routes/OpportunityDetailPage'
+import ProjectWizardPage from '@/routes/ProjectWizardPage'
 import LoginPage from '@/routes/LoginPage'
 import RegisterPage from '@/routes/RegisterPage'
 
@@ -21,6 +22,14 @@ export default function App() {
         element={
           <RequireAuth>
             <OpportunityDetailPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/editais/:id/escrever"
+        element={
+          <RequireAuth>
+            <ProjectWizardPage />
           </RequireAuth>
         }
       />

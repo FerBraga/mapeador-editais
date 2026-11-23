@@ -34,6 +34,6 @@ import { GeolocationModule } from '../geolocation/geolocation.module';
       inject: [ConfigService, GeminiProvider],
     },
   ],
-  exports: [AiAnalysisService, BullModule],
+  exports: [AiAnalysisService, BullModule, AI_PROVIDER],
 })
 export class AiAnalysisModule {}
