@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { HelpCircle, Send, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import type { ProjectDraftQuestionEntry } from '@/types/api'
@@ -25,20 +26,34 @@ export function WizardQuestions({ questions, questionsUsed, maxQuestions, onAsk,
   }
 
   return (
-    <section className="flex flex-col gap-3 rounded-lg border border-border p-4">
-      <div>
-        <h2 className="text-sm font-semibold text-foreground">Dúvidas sobre o edital</h2>
-        <p className="text-xs text-muted-foreground">
-          Pergunte algo pontual sobre este edital. Limitado a {maxQuestions} perguntas por edital.
-        </p>
+    <section className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-sm">
+      <div className="flex items-center gap-2">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent/20 text-accent-foreground">
+          <HelpCircle className="size-4" />
+        </span>
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">Dúvidas sobre o edital</h2>
+          <p className="text-xs text-muted-foreground">
+            {remaining}/{maxQuestions} pergunta{maxQuestions > 1 ? 's' : ''} restante{remaining !== 1 ? 's' : ''}
+          </p>
+        </div>
       </div>
 
       {questions.length > 0 && (
         <ul className="flex flex-col gap-3">
           {questions.map((entry) => (
-            <li key={entry.id} className="flex flex-col gap-1 rounded-lg bg-muted p-2.5 text-sm">
-              <p className="font-medium text-foreground">{entry.question}</p>
-              <p className="whitespace-pre-wrap text-muted-foreground">{entry.answer}</p>
+            <li key={entry.id} className="flex flex-col gap-2">
+              <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-secondary px-3 py-2 text-sm text-secondary-foreground">
+                {entry.question}
+              </div>
+              <div className="flex max-w-[85%] items-start gap-2">
+                <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Sparkles className="size-3.5" />
+                </span>
+                <div className="rounded-2xl rounded-tl-sm bg-muted px-3 py-2 text-sm whitespace-pre-wrap text-foreground">
+                  {entry.answer}
+                </div>
+              </div>
             </li>
           ))}
         </ul>
@@ -53,15 +68,15 @@ export function WizardQuestions({ questions, questionsUsed, maxQuestions, onAsk,
             onChange={(event) => setQuestion(event.target.value)}
           />
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" size="sm" disabled={!canAsk || isAsking} className="w-fit">
+          <Button type="submit" size="sm" disabled={!canAsk || isAsking} className="w-fit gap-1.5">
+            <Send className="size-3.5" />
             {isAsking ? 'Perguntando...' : 'Perguntar'}
           </Button>
-          <span className="text-xs text-muted-foreground">
-            {remaining} pergunta{remaining > 1 ? 's' : ''} restante{remaining > 1 ? 's' : ''}
-          </span>
         </form>
       ) : (
-        <p className="text-xs text-muted-foreground">Limite de perguntas sobre este edital foi atingido.</p>
+        <p className="rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+          Limite de perguntas sobre este edital foi atingido.
+        </p>
       )}
     </section>
   )

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { ArrowLeft, Wand2 } from 'lucide-react'
 import { ApiError } from '@/lib/api'
 import { useOpportunity } from '@/hooks/use-opportunities'
 import {
@@ -8,10 +9,10 @@ import {
   useRegenerateProjectDraftSection,
   useSubmitProjectDraftSection,
 } from '@/hooks/use-project-draft'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { buttonVariants } from '@/components/ui/button'
 import { WizardSectionPanel } from '@/components/wizard/WizardSectionPanel'
 import { WizardQuestions } from '@/components/wizard/WizardQuestions'
+import { WizardStepper } from '@/components/wizard/WizardStepper'
 import type { ProjectDraftSectionKey } from '@/types/api'
 
 function extractErrorMessage(error: unknown): string {
@@ -52,33 +53,26 @@ export default function ProjectWizardPage() {
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 p-4 sm:p-6">
-      <Link to={`/editais/${id}`} className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'w-fit' })}>
-        ← Voltar ao edital
+      <Link
+        to={`/editais/${id}`}
+        className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'w-fit gap-1.5' })}
+      >
+        <ArrowLeft className="size-4" />
+        Voltar ao edital
       </Link>
 
-      <header className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold text-foreground">Escrever meu projeto com ajuda da IA</h1>
-        <p className="text-sm text-muted-foreground">{opportunityQuery.data.title}</p>
+      <header className="flex flex-col gap-2 rounded-2xl border border-primary/20 bg-primary/5 p-5">
+        <div className="flex items-center gap-2 text-primary">
+          <Wand2 className="size-5" />
+          <h1 className="text-xl font-semibold text-foreground">Escrever meu projeto com ajuda da IA</h1>
+        </div>
+        <p className="text-sm font-medium text-muted-foreground">{opportunityQuery.data.title}</p>
         <p className="text-xs text-muted-foreground">
           Responda as perguntas de cada seção. A IA escreve o texto para você copiar e ajustar como quiser.
         </p>
       </header>
 
-      <nav className="flex flex-wrap gap-2">
-        {draft.sections.map((section) => (
-          <Button
-            key={section.section}
-            type="button"
-            size="sm"
-            variant={section.section === activeSection ? 'default' : 'outline'}
-            onClick={() => setActiveSection(section.section)}
-            className={cn(section.generatedText && section.section !== activeSection && 'border-primary/50')}
-          >
-            {section.title}
-            {section.generatedText ? ' ✓' : ''}
-          </Button>
-        ))}
-      </nav>
+      <WizardStepper sections={draft.sections} activeSection={activeSection} onSelect={setActiveSection} />
 
       <WizardSectionPanel
         key={currentSection.section}

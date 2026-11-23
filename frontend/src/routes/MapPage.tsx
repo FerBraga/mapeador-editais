@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { LogOut } from 'lucide-react'
 import { MapView } from '@/components/map/MapView'
 import { FilterBar } from '@/components/filters/FilterBar'
 import { OpportunityList } from '@/components/opportunities/OpportunityList'
@@ -35,7 +36,8 @@ export default function MapPage() {
 
           <div className="flex items-center gap-2">
             <span className="hidden text-sm text-muted-foreground sm:inline">Olá, {user?.name}</span>
-            <Button type="button" size="sm" variant="outline" onClick={logout}>
+            <Button type="button" size="sm" variant="outline" onClick={logout} className="gap-1.5">
+              <LogOut className="size-3.5" />
               Sair
             </Button>
           </div>

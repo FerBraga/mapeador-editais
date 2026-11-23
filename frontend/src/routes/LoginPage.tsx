@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { LogIn } from 'lucide-react'
 import { ApiError } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 import { Button } from '@/components/ui/button'
@@ -29,12 +30,15 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 p-6">
-      <div>
+      <div className="flex flex-col items-center gap-2 text-center">
+        <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <LogIn className="size-5" />
+        </span>
         <h1 className="text-lg font-semibold text-foreground">Entrar</h1>
         <p className="text-sm text-muted-foreground">Acesse sua conta de proponente.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-sm">
         <div className="flex flex-col gap-1">
           <label htmlFor="email" className="text-xs font-medium text-muted-foreground">
             E-mail
@@ -44,6 +48,7 @@ export default function LoginPage() {
             type="email"
             autoComplete="email"
             required
+            className="h-10"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
@@ -58,6 +63,7 @@ export default function LoginPage() {
             type="password"
             autoComplete="current-password"
             required
+            className="h-10"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
@@ -65,14 +71,14 @@ export default function LoginPage() {
 
         {error && <p className="text-sm text-destructive">{error}</p>}
 
-        <Button type="submit" disabled={isSubmitting} className="mt-2">
+        <Button type="submit" disabled={isSubmitting} size="lg" className="mt-2">
           {isSubmitting ? 'Entrando...' : 'Entrar'}
         </Button>
       </form>
 
       <p className="text-sm text-muted-foreground">
         Ainda não tem conta?{' '}
-        <Link to="/cadastro" className="text-primary underline-offset-4 hover:underline">
+        <Link to="/cadastro" className="font-medium text-primary underline-offset-4 hover:underline">
           Cadastre-se
         </Link>
       </p>

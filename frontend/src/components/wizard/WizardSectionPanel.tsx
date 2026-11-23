@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
+import { Check, Copy, RotateCcw, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { cn } from '@/lib/utils'
 import type { ProjectDraftSectionState } from '@/types/api'
 
 interface WizardSectionPanelProps {
@@ -51,11 +53,11 @@ export function WizardSectionPanel({
   const canRegenerate = Boolean(section.generatedText) && regenerationsLeft > 0
 
   return (
-    <div className="flex flex-col gap-4">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+    <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-5 shadow-sm">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {section.questions.map((question) => (
-          <div key={question.key} className="flex flex-col gap-1">
-            <label htmlFor={question.key} className="text-sm text-foreground">
+          <div key={question.key} className="flex flex-col gap-1.5">
+            <label htmlFor={question.key} className="text-sm font-medium text-foreground">
               {question.label}
             </label>
             <Textarea
@@ -70,19 +72,33 @@ export function WizardSectionPanel({
 
         {error && <p className="text-sm text-destructive">{error}</p>}
 
-        <Button type="submit" disabled={isSubmitting} className="w-fit">
-          {isSubmitting ? 'Gerando...' : section.generatedText ? 'Salvar e gerar novamente' : 'Gerar texto'}
+        <Button type="submit" disabled={isSubmitting} className="w-fit gap-1.5">
+          <Sparkles className="size-4" />
+          {isSubmitting ? 'Gerando...' : section.generatedText ? 'Salvar e gerar novamente' : 'Gerar texto com IA'}
         </Button>
       </form>
 
       {section.generatedText && (
-        <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted p-3">
-          <p className="whitespace-pre-wrap text-sm text-foreground">{section.generatedText}</p>
-          <div className="flex items-center gap-2">
-            <Button type="button" size="sm" variant="outline" onClick={handleCopy}>
+        <div className="flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-primary">
+            <Sparkles className="size-3.5" />
+            Texto gerado pela IA
+          </div>
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{section.generatedText}</p>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <Button type="button" size="sm" variant="outline" onClick={handleCopy} className="gap-1.5">
+              {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
               {copied ? 'Copiado!' : 'Copiar texto'}
             </Button>
-            <Button type="button" size="sm" variant="outline" disabled={!canRegenerate || isRegenerating} onClick={onRegenerate}>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={!canRegenerate || isRegenerating}
+              onClick={onRegenerate}
+              className="gap-1.5"
+            >
+              <RotateCcw className={cn('size-3.5', isRegenerating && 'animate-spin')} />
               {isRegenerating ? 'Gerando...' : 'Gerar novamente'}
             </Button>
             <span className="text-xs text-muted-foreground">

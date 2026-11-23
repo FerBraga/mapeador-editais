@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { ArrowLeft, Wand2 } from 'lucide-react'
 import { ApiError } from '@/lib/api'
 import { useOpportunity } from '@/hooks/use-opportunities'
 import { Badge } from '@/components/ui/badge'
@@ -43,8 +44,9 @@ export default function OpportunityDetailPage() {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 p-4 sm:p-6">
-      <Link to="/" className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'w-fit' })}>
-        ← Voltar ao mapa
+      <Link to="/" className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'w-fit gap-1.5' })}>
+        <ArrowLeft className="size-4" />
+        Voltar ao mapa
       </Link>
 
       <header className="flex flex-col gap-2">
@@ -140,7 +142,8 @@ export default function OpportunityDetailPage() {
       )}
 
       {opportunity.latestAnalysis && (
-        <Link to={`/editais/${opportunity.id}/escrever`} className={buttonVariants({ className: 'w-fit' })}>
+        <Link to={`/editais/${opportunity.id}/escrever`} className={buttonVariants({ size: 'lg', className: 'w-fit gap-2' })}>
+          <Wand2 className="size-4" />
           Escrever meu projeto com ajuda da IA
         </Link>
       )}

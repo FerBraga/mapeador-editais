@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { UserPlus } from 'lucide-react'
 import { ApiError } from '@/lib/api'
 import { useAuth } from '@/lib/auth-context'
 import { Button } from '@/components/ui/button'
@@ -30,14 +31,17 @@ export default function RegisterPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 p-6">
-      <div>
+      <div className="flex flex-col items-center gap-2 text-center">
+        <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <UserPlus className="size-5" />
+        </span>
         <h1 className="text-lg font-semibold text-foreground">Criar conta</h1>
         <p className="text-sm text-muted-foreground">
           Cadastre-se como proponente para usar o copiloto de escrita.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-sm">
         <div className="flex flex-col gap-1">
           <label htmlFor="name" className="text-xs font-medium text-muted-foreground">
             Nome
@@ -46,6 +50,7 @@ export default function RegisterPage() {
             id="name"
             autoComplete="name"
             required
+            className="h-10"
             value={name}
             onChange={(event) => setName(event.target.value)}
           />
@@ -60,6 +65,7 @@ export default function RegisterPage() {
             type="email"
             autoComplete="email"
             required
+            className="h-10"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
@@ -75,6 +81,7 @@ export default function RegisterPage() {
             autoComplete="new-password"
             minLength={8}
             required
+            className="h-10"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
@@ -83,14 +90,14 @@ export default function RegisterPage() {
 
         {error && <p className="text-sm text-destructive">{error}</p>}
 
-        <Button type="submit" disabled={isSubmitting} className="mt-2">
+        <Button type="submit" disabled={isSubmitting} size="lg" className="mt-2">
           {isSubmitting ? 'Criando conta...' : 'Criar conta'}
         </Button>
       </form>
 
       <p className="text-sm text-muted-foreground">
         Já tem conta?{' '}
-        <Link to="/entrar" className="text-primary underline-offset-4 hover:underline">
+        <Link to="/entrar" className="font-medium text-primary underline-offset-4 hover:underline">
           Entrar
         </Link>
       </p>
