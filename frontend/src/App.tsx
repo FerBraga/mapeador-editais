@@ -3,6 +3,7 @@ import { RequireAuth } from '@/components/auth/RequireAuth'
 import MapPage from '@/routes/MapPage'
 import OpportunityDetailPage from '@/routes/OpportunityDetailPage'
 import ProjectWizardPage from '@/routes/ProjectWizardPage'
+import CertificatesHubPage from '@/routes/CertificatesHubPage'
 import LoginPage from '@/routes/LoginPage'
 import RegisterPage from '@/routes/RegisterPage'
 
@@ -30,6 +31,14 @@ export default function App() {
         element={
           <RequireAuth>
             <ProjectWizardPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/certidoes"
+        element={
+          <RequireAuth>
+            <CertificatesHubPage />
           </RequireAuth>
         }
       />

@@ -117,6 +117,11 @@ export default function OpportunityDetailPage() {
                   <p className="text-xs text-muted-foreground">
                     {DOCUMENT_CATEGORY_LABELS[doc.documentCategory] ?? doc.documentCategory}
                   </p>
+                  {doc.documentCategory === 'TAX' && (
+                    <Link to="/certidoes#fiscal" className="text-xs text-primary underline-offset-4 hover:underline">
+                      Emitir na Central de Certidões →
+                    </Link>
+                  )}
                 </div>
                 <Badge variant={doc.isMandatory ? 'accent' : 'outline'}>
                   {doc.isMandatory ? 'Obrigatório' : 'Recomendado'}

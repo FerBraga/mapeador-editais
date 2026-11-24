@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { LogOut } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { FileCheck2, LogOut } from 'lucide-react'
 import { MapView } from '@/components/map/MapView'
 import { FilterBar } from '@/components/filters/FilterBar'
 import { OpportunityList } from '@/components/opportunities/OpportunityList'
@@ -35,6 +36,13 @@ export default function MapPage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Link
+              to="/certidoes"
+              className="hidden items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground sm:flex"
+            >
+              <FileCheck2 className="size-4" />
+              Certidões
+            </Link>
             <span className="hidden text-sm text-muted-foreground sm:inline">Olá, {user?.name}</span>
             <Button type="button" size="sm" variant="outline" onClick={logout} className="gap-1.5">
               <LogOut className="size-3.5" />
